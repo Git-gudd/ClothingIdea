@@ -1,0 +1,745 @@
+[
+  {
+    "id": 1,
+    "image": "Images/Picture2.png",
+    "title": "Plaid shirt jacket over olive hoodie",
+    "outer": {
+      "type": "Shirt jacket",
+      "color": "Burgundy",
+      "pattern": "Plaid",
+      "material": "Wool",
+      "fit": "Regular"
+    },
+    "top": {
+      "type": "Hoodie",
+      "color": "Olive",
+      "fit": "Regular",
+      "layered": "White T-shirt underneath"
+    },
+    "bottom": {
+      "type": "Jeans",
+      "color": "Black",
+      "fit": "Straight"
+    },
+    "shoes": {
+      "type": "Chelsea boots",
+      "color": "Black",
+      "material": "Leather"
+    },
+    "season": ["Fall", "Winter"],
+    "occasion": ["Casual", "Weekend"],
+    "style": ["Rugged", "Layered", "Americana"],
+    "keywords": ["layering", "three layers", "hoodie under jacket", "cozy", "cold weather"],
+    "notes": "Hoodie plus overshirt is an easy way to add warmth without a bulky coat."
+  },
+  {
+    "id": 2,
+    "image": "Images/Picture3.png",
+    "title": "All black with white tank",
+    "outer": {
+      "type": "Overshirt",
+      "color": "Black",
+      "material": "Linen",
+      "fit": "Relaxed"
+    },
+    "top": {
+      "type": "Tank top",
+      "color": "White",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Trousers",
+      "color": "Black",
+      "fit": "Straight"
+    },
+    "shoes": {
+      "type": "Sneakers",
+      "color": "White",
+      "material": "Leather"
+    },
+    "season": ["Spring", "Summer"],
+    "occasion": ["Casual", "Night out", "Date"],
+    "style": ["Minimal", "Monochrome", "Relaxed"],
+    "keywords": ["black and white", "open shirt", "clean", "simple", "high contrast"],
+    "notes": "White sneakers keep an all black outfit from reading too heavy."
+  },
+  {
+    "id": 3,
+    "image": "Images/Picture4.png",
+    "title": "Sage camp shirt over white tee",
+    "outer": {
+      "type": "Camp collar shirt",
+      "color": "Sage green",
+      "sleeve": "Short sleeve",
+      "fit": "Relaxed"
+    },
+    "top": {
+      "type": "T-shirt",
+      "color": "White",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Jeans",
+      "color": "Indigo",
+      "wash": "Dark wash",
+      "fit": "Straight"
+    },
+    "shoes": {
+      "type": "Sneakers",
+      "color": "White"
+    },
+    "season": ["Spring", "Summer"],
+    "occasion": ["Casual", "Coffee", "Weekend"],
+    "style": ["Minimal", "Soft", "Everyday"],
+    "keywords": ["green", "open camp shirt", "dark denim", "easy", "coffee date"],
+    "notes": "Muted green reads softer than a bold color but still adds interest."
+  },
+  {
+    "id": 4,
+    "image": "Images/Picture5.png",
+    "title": "Oatmeal cardigan with black denim",
+    "outer": {
+      "type": "Cardigan",
+      "color": "Oatmeal",
+      "material": "Knit",
+      "fit": "Oversized"
+    },
+    "top": {
+      "type": "T-shirt",
+      "color": "White",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Jeans",
+      "color": "Black",
+      "fit": "Slim"
+    },
+    "shoes": {
+      "type": "High-top sneakers",
+      "color": "Black",
+      "accent": "Red"
+    },
+    "accessories": ["Silver chain necklace", "Bracelet"],
+    "season": ["Fall", "Spring"],
+    "occasion": ["Casual", "Weekend"],
+    "style": ["Streetwear", "Cozy", "Neutral"],
+    "keywords": ["chunky knit", "beige", "sneakers", "warm neutrals", "open cardigan"],
+    "notes": "The cardigan does all the work here, so the rest stays plain."
+  },
+  {
+    "id": 5,
+    "image": "Images/Picture6.png",
+    "title": "Denim shirt over tee with chinos",
+    "outer": {
+      "type": "Denim shirt",
+      "color": "Light blue",
+      "material": "Denim",
+      "fit": "Regular"
+    },
+    "top": {
+      "type": "T-shirt",
+      "color": "White",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Chinos",
+      "color": "Khaki",
+      "fit": "Slim"
+    },
+    "shoes": {
+      "type": "Sneakers",
+      "color": "Grey",
+      "material": "Canvas"
+    },
+    "season": ["Spring", "Fall"],
+    "occasion": ["Casual", "Smart casual", "Weekend"],
+    "style": ["Classic", "Americana", "Everyday"],
+    "keywords": ["chambray", "denim over tee", "khaki", "tan pants", "layer over a tee"],
+    "notes": "Denim shirt works open as a light jacket or buttoned as a shirt."
+  },
+  {
+    "id": 6,
+    "image": "Images/Picture7.png",
+    "title": "Sherpa trucker over grey sweatsuit",
+    "outer": {
+      "type": "Trucker jacket",
+      "color": "Black",
+      "material": "Sherpa lined",
+      "fit": "Regular"
+    },
+    "top": {
+      "type": "Hoodie",
+      "color": "Grey",
+      "fit": "Relaxed"
+    },
+    "bottom": {
+      "type": "Sweatpants",
+      "color": "Grey",
+      "fit": "Jogger"
+    },
+    "shoes": {
+      "type": "Sneakers",
+      "color": "White",
+      "material": "Leather"
+    },
+    "season": ["Fall", "Winter"],
+    "occasion": ["Casual", "Errands", "Travel"],
+    "style": ["Athleisure", "Streetwear", "Comfort"],
+    "keywords": ["grey sweatsuit", "matching set", "loungewear", "airport", "warm"],
+    "notes": "A structured jacket over a full sweatsuit keeps it from looking like pyjamas."
+  },
+  {
+    "id": 7,
+    "image": "Images/Picture8.png",
+    "title": "Black overshirt with mid-wash jeans",
+    "outer": {
+      "type": "Overshirt",
+      "color": "Black",
+      "fit": "Regular"
+    },
+    "top": {
+      "type": "Tank top",
+      "color": "White",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Jeans",
+      "color": "Blue",
+      "wash": "Mid wash",
+      "fit": "Straight"
+    },
+    "shoes": {
+      "type": "Boots",
+      "color": "Black",
+      "material": "Leather"
+    },
+    "accessories": ["Gold chain necklace"],
+    "season": ["Spring", "Fall"],
+    "occasion": ["Casual", "Night out"],
+    "style": ["Rugged", "Relaxed", "Everyday"],
+    "keywords": ["cuffed jeans", "black and blue", "open shirt", "simple"],
+    "notes": "Cuffing the hem shows the boot and stops the leg from stacking."
+  },
+  {
+    "id": 8,
+    "image": "Images/Picture9.png",
+    "title": "Taupe jacket with light denim",
+    "outer": {
+      "type": "Harrington jacket",
+      "color": "Taupe",
+      "fit": "Regular"
+    },
+    "top": {
+      "type": "T-shirt",
+      "color": "Black",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Jeans",
+      "color": "Light blue",
+      "wash": "Light wash",
+      "fit": "Straight"
+    },
+    "shoes": {
+      "type": "Sneakers",
+      "color": "White",
+      "material": "Leather"
+    },
+    "accessories": ["Black leather belt", "Gold chain necklace"],
+    "season": ["Spring", "Fall"],
+    "occasion": ["Casual", "Smart casual", "Weekend"],
+    "style": ["Minimal", "Clean", "Neutral"],
+    "keywords": ["beige jacket", "light denim", "tucked tee", "balanced"],
+    "notes": "Neutral outerwear over black keeps the contrast soft."
+  },
+  {
+    "id": 9,
+    "image": "Images/Picture10.png",
+    "title": "Head to toe black",
+    "outer": {
+      "type": "Camp collar shirt",
+      "color": "Black",
+      "sleeve": "Short sleeve",
+      "fit": "Relaxed"
+    },
+    "top": {
+      "type": "T-shirt",
+      "color": "Black",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Jeans",
+      "color": "Black",
+      "fit": "Slim"
+    },
+    "shoes": {
+      "type": "Sneakers",
+      "color": "Black"
+    },
+    "accessories": ["Black leather belt", "Silver chain necklace", "Watch"],
+    "season": ["Spring", "Summer", "Fall"],
+    "occasion": ["Night out", "Date", "Dinner"],
+    "style": ["Monochrome", "Minimal", "Sleek"],
+    "keywords": ["all black", "black on black", "evening", "clean", "sharp"],
+    "notes": "Mixing textures matters when everything is one color."
+  },
+  {
+    "id": 10,
+    "image": "Images/Picture11.png",
+    "title": "Blazer with tee and cuffed chinos",
+    "outer": {
+      "type": "Blazer",
+      "color": "Charcoal",
+      "fit": "Slim"
+    },
+    "top": {
+      "type": "T-shirt",
+      "color": "Grey",
+      "fit": "Relaxed"
+    },
+    "bottom": {
+      "type": "Chinos",
+      "color": "Khaki",
+      "fit": "Slim",
+      "detail": "Cuffed"
+    },
+    "shoes": {
+      "type": "Boat shoes",
+      "color": "Grey",
+      "material": "Suede"
+    },
+    "accessories": ["Bracelet"],
+    "season": ["Spring", "Summer"],
+    "occasion": ["Smart casual", "Weekend", "Drinks"],
+    "style": ["Preppy", "Relaxed tailoring", "Coastal"],
+    "keywords": ["rolled hem", "no socks", "blazer with tee", "dressed down jacket"],
+    "notes": "A soft unstructured blazer over a plain tee is the easiest way to look put together."
+  },
+  {
+    "id": 11,
+    "image": "Images/Picture12.png",
+    "title": "Oversized white tee and light jeans",
+    "top": {
+      "type": "T-shirt",
+      "color": "White",
+      "fit": "Oversized"
+    },
+    "bottom": {
+      "type": "Jeans",
+      "color": "Light blue",
+      "wash": "Light wash",
+      "fit": "Relaxed"
+    },
+    "shoes": {
+      "type": "Sneakers",
+      "color": "White"
+    },
+    "season": ["Spring", "Summer"],
+    "occasion": ["Casual", "Errands", "Coffee"],
+    "style": ["Minimal", "Streetwear", "Everyday"],
+    "keywords": ["boxy tee", "basics", "white and blue", "simple", "clean"],
+    "notes": "Boxy tee plus relaxed jeans, the default warm weather uniform."
+  },
+  {
+    "id": 12,
+    "image": "Images/Picture13.png",
+    "title": "Cream tee with charcoal trousers",
+    "top": {
+      "type": "T-shirt",
+      "color": "Cream",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Trousers",
+      "color": "Charcoal",
+      "fit": "Tapered"
+    },
+    "shoes": {
+      "type": "Sneakers",
+      "color": "White",
+      "material": "Leather"
+    },
+    "accessories": ["Silver chain necklace"],
+    "season": ["Spring", "Summer", "Fall"],
+    "occasion": ["Smart casual", "Office", "Coffee"],
+    "style": ["Minimal", "Scandinavian", "Clean"],
+    "keywords": ["grey pants", "off white", "neutral", "tidy", "understated"],
+    "notes": "Swapping jeans for trousers instantly makes a plain tee look intentional."
+  },
+  {
+    "id": 13,
+    "image": "Images/Picture14.png",
+    "title": "Navy short sleeve shirt with white jeans",
+    "top": {
+      "type": "Button-up shirt",
+      "color": "Navy",
+      "sleeve": "Short sleeve",
+      "fit": "Slim"
+    },
+    "bottom": {
+      "type": "Jeans",
+      "color": "White",
+      "fit": "Slim",
+      "detail": "Distressed"
+    },
+    "shoes": {
+      "type": "Sneakers",
+      "color": "White",
+      "material": "Canvas"
+    },
+    "accessories": ["Watch"],
+    "season": ["Summer"],
+    "occasion": ["Casual", "Vacation", "Date"],
+    "style": ["Coastal", "Preppy", "Summer"],
+    "keywords": ["white denim", "ripped jeans", "navy and white", "holiday", "bright"],
+    "notes": "White jeans need a strong top color to anchor them."
+  },
+  {
+    "id": 14,
+    "image": "Images/Picture15.png",
+    "title": "Black suit with a tee",
+    "outer": {
+      "type": "Blazer",
+      "color": "Black",
+      "fit": "Relaxed"
+    },
+    "top": {
+      "type": "T-shirt",
+      "color": "Black",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Suit trousers",
+      "color": "Black",
+      "fit": "Wide leg"
+    },
+    "shoes": {
+      "type": "Loafers",
+      "color": "Black",
+      "material": "Leather"
+    },
+    "accessories": ["Silver buckle belt", "Silver chain necklace"],
+    "season": ["Fall", "Winter"],
+    "occasion": ["Formal", "Night out", "Event", "Dinner"],
+    "style": ["Monochrome", "Tailored", "Sleek", "Modern"],
+    "keywords": ["all black", "suit without shirt", "no tie", "wide trousers", "evening"],
+    "notes": "A tee under the jacket keeps a black suit from feeling like business wear."
+  },
+  {
+    "id": 15,
+    "image": "Images/Picture16.png",
+    "title": "Navy shirt jacket with light denim",
+    "outer": {
+      "type": "Shirt jacket",
+      "color": "Navy",
+      "material": "Suede",
+      "fit": "Regular"
+    },
+    "top": {
+      "type": "T-shirt",
+      "color": "Navy",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Jeans",
+      "color": "Light blue",
+      "wash": "Light wash",
+      "fit": "Straight"
+    },
+    "shoes": {
+      "type": "Chelsea boots",
+      "color": "Black",
+      "material": "Leather"
+    },
+    "accessories": ["Black leather belt"],
+    "season": ["Spring", "Fall"],
+    "occasion": ["Casual", "Smart casual"],
+    "style": ["Rugged", "Classic", "Tonal"],
+    "keywords": ["tonal navy", "suede", "chore jacket", "light denim", "boots"],
+    "notes": "Matching the jacket and tee shade makes the light denim pop."
+  },
+  {
+    "id": 16,
+    "image": "Images/Picture17.png",
+    "title": "Windowpane blazer with jeans",
+    "outer": {
+      "type": "Blazer",
+      "color": "Grey",
+      "pattern": "Windowpane check",
+      "fit": "Slim"
+    },
+    "top": {
+      "type": "T-shirt",
+      "color": "White",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Jeans",
+      "color": "Light blue",
+      "wash": "Light wash",
+      "fit": "Straight"
+    },
+    "shoes": {
+      "type": "Loafers",
+      "color": "Black",
+      "material": "Leather"
+    },
+    "accessories": ["Silver buckle belt", "Pendant necklace", "Pocket square"],
+    "season": ["Spring", "Fall"],
+    "occasion": ["Smart casual", "Dinner", "Drinks"],
+    "style": ["Relaxed tailoring", "Classic", "Pattern"],
+    "keywords": ["check blazer", "sport coat with jeans", "patterned jacket", "dressed up denim"],
+    "notes": "A patterned jacket is the statement, so everything else stays plain."
+  },
+  {
+    "id": 17,
+    "image": "Images/Picture18.png",
+    "title": "Camel blazer with cream trousers",
+    "outer": {
+      "type": "Blazer",
+      "color": "Camel",
+      "fit": "Regular"
+    },
+    "top": {
+      "type": "T-shirt",
+      "color": "Navy",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Trousers",
+      "color": "Cream",
+      "fit": "Straight"
+    },
+    "shoes": {
+      "type": "Loafers",
+      "color": "Brown",
+      "material": "Suede"
+    },
+    "accessories": ["Brown leather belt", "Gold chain necklace"],
+    "season": ["Spring", "Summer"],
+    "occasion": ["Smart casual", "Wedding guest", "Dinner"],
+    "style": ["Italian", "Warm neutrals", "Relaxed tailoring"],
+    "keywords": ["tan blazer", "off white pants", "brown and navy", "summer tailoring"],
+    "notes": "Camel over navy over cream, three warm tones that never fight."
+  },
+  {
+    "id": 18,
+    "image": "Images/Picture19.png",
+    "title": "Denim jacket with flannel and sweat shorts",
+    "outer": {
+      "type": "Denim jacket",
+      "color": "Light blue",
+      "wash": "Light wash",
+      "fit": "Regular"
+    },
+    "top": {
+      "type": "Flannel shirt",
+      "color": "Burgundy",
+      "pattern": "Plaid",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Shorts",
+      "color": "Grey",
+      "material": "Sweat",
+      "fit": "Relaxed"
+    },
+    "shoes": {
+      "type": "Boat shoes",
+      "color": "White"
+    },
+    "season": ["Spring", "Summer"],
+    "occasion": ["Casual", "Beach", "Weekend"],
+    "style": ["Californian", "Layered", "Relaxed"],
+    "keywords": ["beach", "plaid under denim", "cool evening", "coastal", "sweat shorts"],
+    "notes": "Layers on top with shorts below works for cool mornings by the water."
+  },
+  {
+    "id": 19,
+    "image": "Images/Picture20.png",
+    "title": "White linen shirt with black shorts",
+    "top": {
+      "type": "Linen shirt",
+      "color": "White",
+      "sleeve": "Long sleeve",
+      "fit": "Relaxed",
+      "detail": "Sleeves rolled, worn open"
+    },
+    "bottom": {
+      "type": "Shorts",
+      "color": "Black",
+      "fit": "Relaxed"
+    },
+    "accessories": ["Pendant necklace", "Bracelet"],
+    "season": ["Summer"],
+    "occasion": ["Vacation", "Beach", "Dinner", "Date"],
+    "style": ["Resort", "Minimal", "Coastal"],
+    "keywords": ["linen", "holiday", "rolled sleeves", "black and white", "warm evening"],
+    "notes": "Open linen shirt over shorts, the easiest hot weather look."
+  },
+  {
+    "id": 20,
+    "image": "Images/Picture21.png",
+    "title": "Knit polo with navy shorts",
+    "top": {
+      "type": "Polo shirt",
+      "color": "Cream",
+      "material": "Knit",
+      "sleeve": "Short sleeve",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Shorts",
+      "color": "Navy",
+      "fit": "Regular"
+    },
+    "shoes": {
+      "type": "Slides",
+      "color": "Cream",
+      "material": "Leather"
+    },
+    "season": ["Summer"],
+    "occasion": ["Casual", "Vacation", "Coffee"],
+    "style": ["Resort", "Minimal", "Warm neutrals"],
+    "keywords": ["knit polo", "beige and navy", "sandals", "poolside", "relaxed"],
+    "notes": "Knit polos dress up shorts more than a T-shirt does."
+  },
+  {
+    "id": 21,
+    "image": "Images/Picture22.png",
+    "title": "Black tee and shorts with woven loafers",
+    "top": {
+      "type": "T-shirt",
+      "color": "Black",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Shorts",
+      "color": "Black",
+      "fit": "Regular"
+    },
+    "shoes": {
+      "type": "Loafers",
+      "color": "Tan",
+      "material": "Raffia"
+    },
+    "accessories": ["Silver chain necklace"],
+    "season": ["Summer"],
+    "occasion": ["Casual", "Vacation", "Dinner"],
+    "style": ["Monochrome", "Minimal", "Resort"],
+    "keywords": ["all black", "woven shoes", "no socks", "simple", "one contrast piece"],
+    "notes": "All black plus one natural texture at the feet."
+  },
+  {
+    "id": 22,
+    "image": "Images/Picture23.png",
+    "title": "Black tee with linen shorts",
+    "top": {
+      "type": "T-shirt",
+      "color": "Black",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Shorts",
+      "color": "Cream",
+      "material": "Linen",
+      "fit": "Relaxed",
+      "detail": "Drawstring"
+    },
+    "shoes": {
+      "type": "Loafers",
+      "color": "Black",
+      "material": "Suede"
+    },
+    "accessories": ["Sunglasses", "Silver chain necklace"],
+    "season": ["Summer"],
+    "occasion": ["Casual", "Vacation", "Dinner"],
+    "style": ["Minimal", "Resort", "Clean"],
+    "keywords": ["linen shorts", "black and cream", "high contrast", "hot weather"],
+    "notes": "Drawstring linen shorts still look sharp with a hard shoe."
+  },
+  {
+    "id": 23,
+    "image": "Images/Picture24.png",
+    "title": "Brown sweatshirt with grey sweat shorts",
+    "top": {
+      "type": "Sweatshirt",
+      "color": "Brown",
+      "material": "Fleece",
+      "fit": "Relaxed"
+    },
+    "bottom": {
+      "type": "Shorts",
+      "color": "Grey",
+      "material": "Sweat",
+      "fit": "Relaxed",
+      "detail": "Drawstring"
+    },
+    "shoes": {
+      "type": "Sneakers",
+      "color": "White",
+      "detail": "Worn with white crew socks"
+    },
+    "accessories": ["Gold chain necklace", "Sunglasses"],
+    "season": ["Spring", "Summer"],
+    "occasion": ["Casual", "Errands", "Weekend"],
+    "style": ["Athleisure", "Streetwear", "Comfort"],
+    "keywords": ["sweat set", "brown and grey", "white socks", "lazy day", "comfortable"],
+    "notes": "Warm brown keeps grey sweats from looking like gym kit."
+  },
+  {
+    "id": 24,
+    "image": "Images/Picture25.png",
+    "title": "Textured knit with white shorts",
+    "top": {
+      "type": "Knit sweater",
+      "color": "Cream",
+      "sleeve": "Short sleeve",
+      "material": "Ribbed knit",
+      "fit": "Oversized"
+    },
+    "bottom": {
+      "type": "Shorts",
+      "color": "White",
+      "fit": "Relaxed"
+    },
+    "accessories": ["Pendant necklace", "Bracelet"],
+    "season": ["Summer"],
+    "occasion": ["Vacation", "Casual", "Dinner"],
+    "style": ["Resort", "Tonal", "Minimal"],
+    "keywords": ["all cream", "tonal", "texture", "boxy", "holiday", "monochrome"],
+    "notes": "Tonal cream on cream works because the two textures differ."
+  },
+  {
+    "id": 25,
+    "image": "Images/Picture26.png",
+    "title": "Tan overshirt with navy shorts",
+    "outer": {
+      "type": "Overshirt",
+      "color": "Tan",
+      "fit": "Relaxed",
+      "detail": "Sleeves rolled"
+    },
+    "top": {
+      "type": "T-shirt",
+      "color": "White",
+      "fit": "Relaxed"
+    },
+    "bottom": {
+      "type": "Shorts",
+      "color": "Navy",
+      "fit": "Regular"
+    },
+    "shoes": {
+      "type": "Sneakers",
+      "color": "White",
+      "material": "Leather"
+    },
+    "accessories": ["Pendant necklace"],
+    "season": ["Spring", "Summer"],
+    "occasion": ["Casual", "Coffee", "Weekend"],
+    "style": ["Minimal", "Warm neutrals", "Everyday"],
+    "keywords": ["shorts with a shirt", "beige", "layered", "clean", "coffee date"],
+    "notes": "A light overshirt makes shorts look deliberate rather than thrown on."
+  }
+]

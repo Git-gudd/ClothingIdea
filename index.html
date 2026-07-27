@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101215">
+  <meta name="description" content="A personal library of outfit inspiration, searchable across every attribute.">
+  <title>Outfit Library</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <h1 class="brand-name">Outfit&nbsp;Library</h1>
+      </div>
+
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+        </svg>
+        <input
+          type="search"
+          id="search"
+          class="search-input"
+          placeholder="Search black summer, oversized, coffee…"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          aria-label="Search outfits">
+        <button type="button" id="clear-search" class="clear-btn" aria-label="Clear search" hidden>&times;</button>
+      </div>
+
+      <p class="count" id="count" aria-live="polite"></p>
+    </div>
+  </header>
+
+  <main class="main">
+    <p class="status" id="status">Loading outfits…</p>
+    <div class="gallery" id="gallery"></div>
+    <p class="empty" id="empty" hidden>
+      No outfits match that search.<br>
+      <span class="empty-hint">Try fewer words, or a different colour, season or style.</span>
+    </p>
+  </main>
+
+  <footer class="footer">
+    <p>Every word you type must appear somewhere in the outfit. Use quotes for exact phrases, or <code>field:value</code> like <code>season:summer</code>.</p>
+  </footer>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="lb-title">
+    <button type="button" class="lb-close" id="lb-close" aria-label="Close preview">&times;</button>
+    <button type="button" class="lb-nav lb-prev" id="lb-prev" aria-label="Previous outfit">&#8249;</button>
+    <button type="button" class="lb-nav lb-next" id="lb-next" aria-label="Next outfit">&#8250;</button>
+
+    <div class="lb-panel" id="lb-panel">
+      <div class="lb-image-wrap">
+        <img class="lb-image" id="lb-image" src="" alt="">
+      </div>
+      <div class="lb-details" id="lb-details">
+        <h2 class="lb-title" id="lb-title"></h2>
+        <dl class="lb-list" id="lb-list"></dl>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
