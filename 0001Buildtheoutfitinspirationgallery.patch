@@ -1,0 +1,1992 @@
+From 2901c6edd28c9494e6a81e81d983b7cc57304d81 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 27 Jul 2026 17:12:34 +0000
+Subject: [PATCH] Build the outfit inspiration gallery
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Static gallery over data.json — no build step, no frameworks.
+
+- data.json: metadata for all 25 photos in Images/, tagged by garment,
+  colour, fit, season, occasion, style and keywords
+- script.js: loads data.json once and filters in memory. The search index
+  is built by walking each record recursively, so new attributes become
+  searchable without code changes. Multi-word queries AND together,
+  punctuation is ignored (tshirt matches T-shirt), and quoted phrases and
+  field:value scoping are supported
+- style.css: dark theme with a blue accent, responsive masonry that steps
+  4/3/2/1 columns, and a lightbox that shrink-wraps to the photo
+- Lightbox closes on backdrop click, Escape or the close button; arrow keys
+  move through the current filter
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_018L2BZgrSpCaQ8RPdasHPtR
+---
+ README.md  |  95 +++++++
+ data.json  | 745 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ index.html |  73 ++++++
+ script.js  | 475 ++++++++++++++++++++++++++++++++++
+ style.css  | 538 ++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 1926 insertions(+)
+ create mode 100644 README.md
+ create mode 100644 script.js
+ create mode 100644 style.css
+
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..75c79e7
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,95 @@
++# Outfit Library
++
++A personal, searchable gallery of outfit inspiration. Static HTML, CSS and
++vanilla JavaScript — no build step, no frameworks, no backend.
++
++## Files
++
++```
++index.html    markup and the lightbox shell
++style.css     dark theme, responsive masonry gallery
++script.js     loads data.json once, filters in memory
++data.json     all outfit metadata
++Images/       the outfit photos
++```
++
++## Running it
++
++`data.json` is loaded with `fetch`, which browsers block on `file://` URLs, so
++opening `index.html` by double-clicking will show a load error. Use any static
++server:
++
++```sh
++python3 -m http.server 8000
++# then open http://localhost:8000
++```
++
++On GitHub Pages it just works — enable Pages for the repository (Settings →
++Pages → deploy from branch) and visit the published URL.
++
++## Adding an outfit
++
++1. Drop the photo in `Images/`.
++2. Append an object to the array in `data.json`.
++
++Only `id` and `image` are actually required. Everything else is optional, and
++**you can invent new attributes freely** — the search index and the detail panel
++both walk the object recursively, so a new field becomes searchable and visible
++without touching `script.js`.
++
++```json
++{
++  "id": 26,
++  "image": "Images/Picture27.png",
++  "title": "Grey crewneck with black jeans",
++
++  "outer":  { "type": "Bomber jacket", "color": "Black", "fit": "Regular" },
++  "top":    { "type": "Sweatshirt", "color": "Grey", "fit": "Relaxed" },
++  "bottom": { "type": "Jeans", "color": "Black", "fit": "Slim" },
++  "shoes":  { "type": "Sneakers", "color": "White" },
++
++  "accessories": ["Silver chain necklace"],
++  "season":      ["Fall"],
++  "occasion":    ["Casual"],
++  "style":       ["Minimal", "Streetwear"],
++  "keywords":    ["easy", "everyday"],
++  "notes": ""
++}
++```
++
++Notes on the conventions used here:
++
++- `image` paths are case-sensitive on GitHub Pages — the folder is `Images/`.
++- `outer` is the outer layer (jacket, overshirt, cardigan). Omit it when there
++  isn't one.
++- Keys listed in `FIELD_ORDER` in `script.js` are shown first in the detail
++  panel; anything else is appended in the order it appears in the JSON.
++- Gallery cards show `season` as plain tags and `style` as blue tags.
++
++## Searching
++
++Every value **and** every field name is indexed, at any nesting depth. Matching
++is case-insensitive and partial, and punctuation is ignored, so `tshirt` finds
++`T-shirt`.
++
++| You type | You get |
++| --- | --- |
++| `black` | anything black, anywhere in the record |
++| `black summer` | outfits matching **both** words |
++| `black oversized tshirt` | all three, across different attributes |
++| `"coffee date"` | that exact phrase |
++| `season:summer` | scoped to the `season` field |
++| `color:black` | scoped to any `*.color` field — top, bottom, shoes… |
++
++Field prefixes match any path containing that name, so `type:jeans` checks
++`top.type`, `bottom.type` and `shoes.type` alike.
++
++## Keyboard
++
++| Key | Action |
++| --- | --- |
++| `/` | jump to the search box |
++| `Esc` | clear the search, or close the preview |
++| `←` `→` | previous / next outfit in the preview |
++
++The preview also closes by clicking the backdrop or the × button.
+diff --git a/data.json b/data.json
+index e69de29..ba6ef58 100644
+--- a/data.json
++++ b/data.json
+@@ -0,0 +1,745 @@
++[
++  {
++    "id": 1,
++    "image": "Images/Picture2.png",
++    "title": "Plaid shirt jacket over olive hoodie",
++    "outer": {
++      "type": "Shirt jacket",
++      "color": "Burgundy",
++      "pattern": "Plaid",
++      "material": "Wool",
++      "fit": "Regular"
++    },
++    "top": {
++      "type": "Hoodie",
++      "color": "Olive",
++      "fit": "Regular",
++      "layered": "White T-shirt underneath"
++    },
++    "bottom": {
++      "type": "Jeans",
++      "color": "Black",
++      "fit": "Straight"
++    },
++    "shoes": {
++      "type": "Chelsea boots",
++      "color": "Black",
++      "material": "Leather"
++    },
++    "season": ["Fall", "Winter"],
++    "occasion": ["Casual", "Weekend"],
++    "style": ["Rugged", "Layered", "Americana"],
++    "keywords": ["layering", "three layers", "hoodie under jacket", "cozy", "cold weather"],
++    "notes": "Hoodie plus overshirt is an easy way to add warmth without a bulky coat."
++  },
++  {
++    "id": 2,
++    "image": "Images/Picture3.png",
++    "title": "All black with white tank",
++    "outer": {
++      "type": "Overshirt",
++      "color": "Black",
++      "material": "Linen",
++      "fit": "Relaxed"
++    },
++    "top": {
++      "type": "Tank top",
++      "color": "White",
++      "fit": "Regular"
++    },
++    "bottom": {
++      "type": "Trousers",
++      "color": "Black",
++      "fit": "Straight"
++    },
++    "shoes": {
++      "type": "Sneakers",
++      "color": "White",
++      "material": "Leather"
++    },
++    "season": ["Spring", "Summer"],
++    "occasion": ["Casual", "Night out", "Date"],
++    "style": ["Minimal", "Monochrome", "Relaxed"],
++    "keywords": ["black and white", "open shirt", "clean", "simple", "high contrast"],
++    "notes": "White sneakers keep an all black outfit from reading too heavy."
++  },
++  {
++    "id": 3,
++    "image": "Images/Picture4.png",
++    "title": "Sage camp shirt over white tee",
++    "outer": {
++      "type": "Camp collar shirt",
++      "color": "Sage green",
++      "sleeve": "Short sleeve",
++      "fit": "Relaxed"
++    },
++    "top": {
++      "type": "T-shirt",
++      "color": "White",
++      "fit": "Regular"
++    },
++    "bottom": {
++      "type": "Jeans",
++      "color": "Indigo",
++      "wash": "Dark wash",
++      "fit": "Straight"
++    },
++    "shoes": {
++      "type": "Sneakers",
++      "color": "White"
++    },
++    "season": ["Spring", "Summer"],
++    "occasion": ["Casual", "Coffee", "Weekend"],
++    "style": ["Minimal", "Soft", "Everyday"],
++    "keywords": ["green", "open camp shirt", "dark denim", "easy", "coffee date"],
++    "notes": "Muted green reads softer than a bold color but still adds interest."
++  },
++  {
++    "id": 4,
++    "image": "Images/Picture5.png",
++    "title": "Oatmeal cardigan with black denim",
++    "outer": {
++      "type": "Cardigan",
++      "color": "Oatmeal",
++      "material": "Knit",
++      "fit": "Oversized"
++    },
++    "top": {
++      "type": "T-shirt",
++      "color": "White",
++      "fit": "Regular"
++    },
++    "bottom": {
++      "type": "Jeans",
++      "color": "Black",
++      "fit": "Slim"
++    },
++    "shoes": {
++      "type": "High-top sneakers",
++      "color": "Black",
++      "accent": "Red"
++    },
++    "accessories": ["Silver chain necklace", "Bracelet"],
++    "season": ["Fall", "Spring"],
++    "occasion": ["Casual", "Weekend"],
++    "style": ["Streetwear", "Cozy", "Neutral"],
++    "keywords": ["chunky knit", "beige", "sneakers", "warm neutrals", "open cardigan"],
++    "notes": "The cardigan does all the work here, so the rest stays plain."
++  },
++  {
++    "id": 5,
++    "image": "Images/Picture6.png",
++    "title": "Denim shirt over tee with chinos",
++    "outer": {
++      "type": "Denim shirt",
++      "color": "Light blue",
++      "material": "Denim",
++      "fit": "Regular"
++    },
++    "top": {
++      "type": "T-shirt",
++      "color": "White",
++      "fit": "Regular"
++    },
++    "bottom": {
++      "type": "Chinos",
++      "color": "Khaki",
++      "fit": "Slim"
++    },
++    "shoes": {
++      "type": "Sneakers",
++      "color": "Grey",
++      "material": "Canvas"
++    },
++    "season": ["Spring", "Fall"],
++    "occasion": ["Casual", "Smart casual", "Weekend"],
++    "style": ["Classic", "Americana", "Everyday"],
++    "keywords": ["chambray", "denim over tee", "khaki", "tan pants", "layer over a tee"],
++    "notes": "Denim shirt works open as a light jacket or buttoned as a shirt."
++  },
++  {
++    "id": 6,
++    "image": "Images/Picture7.png",
++    "title": "Sherpa trucker over grey sweatsuit",
++    "outer": {
++      "type": "Trucker jacket",
++      "color": "Black",
++      "material": "Sherpa lined",
++      "fit": "Regular"
++    },
++    "top": {
++      "type": "Hoodie",
++      "color": "Grey",
++      "fit": "Relaxed"
++    },
++    "bottom": {
++      "type": "Sweatpants",
++      "color": "Grey",
++      "fit": "Jogger"
++    },
++    "shoes": {
++      "type": "Sneakers",
++      "color": "White",
++      "material": "Leather"
++    },
++    "season": ["Fall", "Winter"],
++    "occasion": ["Casual", "Errands", "Travel"],
++    "style": ["Athleisure", "Streetwear", "Comfort"],
++    "keywords": ["grey sweatsuit", "matching set", "loungewear", "airport", "warm"],
++    "notes": "A structured jacket over a full sweatsuit keeps it from looking like pyjamas."
++  },
++  {
++    "id": 7,
++    "image": "Images/Picture8.png",
++    "title": "Black overshirt with mid-wash jeans",
++    "outer": {
++      "type": "Overshirt",
++      "color": "Black",
++      "fit": "Regular"
++    },
++    "top": {
++      "type": "Tank top",
++      "color": "White",
++      "fit": "Regular"
++    },
++    "bottom": {
++      "type": "Jeans",
++      "color": "Blue",
++      "wash": "Mid wash",
++      "fit": "Straight"
++    },
++    "shoes": {
++      "type": "Boots",
++      "color": "Black",
++      "material": "Leather"
++    },
++    "accessories": ["Gold chain necklace"],
++    "season": ["Spring", "Fall"],
++    "occasion": ["Casual", "Night out"],
++    "style": ["Rugged", "Relaxed", "Everyday"],
++    "keywords": ["cuffed jeans", "black and blue", "open shirt", "simple"],
++    "notes": "Cuffing the hem shows the boot and stops the leg from stacking."
++  },
++  {
++    "id": 8,
++    "image": "Images/Picture9.png",
++    "title": "Taupe jacket with light denim",
++    "outer": {
++      "type": "Harrington jacket",
++      "color": "Taupe",
++      "fit": "Regular"
++    },
++    "top": {
++      "type": "T-shirt",
++      "color": "Black",
++      "fit": "Regular"
++    },
++    "bottom": {
++      "type": "Jeans",
++      "color": "Light blue",
++      "wash": "Light wash",
++      "fit": "Straight"
++    },
++    "shoes": {
++      "type": "Sneakers",
++      "color": "White",
++      "material": "Leather"
++    },
++    "accessories": ["Black leather belt", "Gold chain necklace"],
++    "season": ["Spring", "Fall"],
++    "occasion": ["Casual", "Smart casual", "Weekend"],
++    "style": ["Minimal", "Clean", "Neutral"],
++    "keywords": ["beige jacket", "light denim", "tucked tee", "balanced"],
++    "notes": "Neutral outerwear over black keeps the contrast soft."
++  },
++  {
++    "id": 9,
++    "image": "Images/Picture10.png",
++    "title": "Head to toe black",
++    "outer": {
++      "type": "Camp collar shirt",
++      "color": "Black",
++      "sleeve": "Short sleeve",
++      "fit": "Relaxed"
++    },
++    "top": {
++      "type": "T-shirt",
++      "color": "Black",
++      "fit": "Regular"
++    },
++    "bottom": {
++      "type": "Jeans",
++      "color": "Black",
++      "fit": "Slim"
++    },
++    "shoes": {
++      "type": "Sneakers",
++      "color": "Black"
++    },
++    "accessories": ["Black leather belt", "Silver chain necklace", "Watch"],
++    "season": ["Spring", "Summer", "Fall"],
++    "occasion": ["Night out", "Date", "Dinner"],
++    "style": ["Monochrome", "Minimal", "Sleek"],
++    "keywords": ["all black", "black on black", "evening", "clean", "sharp"],
++    "notes": "Mixing textures matters when everything is one color."
++  },
++  {
++    "id": 10,
++    "image": "Images/Picture11.png",
++    "title": "Blazer with tee and cuffed chinos",
++    "outer": {
++      "type": "Blazer",
++      "color": "Charcoal",
++      "fit": "Slim"
++    },
++    "top": {
++      "type": "T-shirt",
++      "color": "Grey",
++      "fit": "Relaxed"
++    },
++    "bottom": {
++      "type": "Chinos",
++      "color": "Khaki",
++      "fit": "Slim",
++      "detail": "Cuffed"
++    },
++    "shoes": {
++      "type": "Boat shoes",
++      "color": "Grey",
++      "material": "Suede"
++    },
++    "accessories": ["Bracelet"],
++    "season": ["Spring", "Summer"],
++    "occasion": ["Smart casual", "Weekend", "Drinks"],
++    "style": ["Preppy", "Relaxed tailoring", "Coastal"],
++    "keywords": ["rolled hem", "no socks", "blazer with tee", "dressed down jacket"],
++    "notes": "A soft unstructured blazer over a plain tee is the easiest way to look put together."
++  },
++  {
++    "id": 11,
++    "image": "Images/Picture12.png",
++    "title": "Oversized white tee and light jeans",
++    "top": {
++      "type": "T-shirt",
++      "color": "White",
++      "fit": "Oversized"
++    },
++    "bottom": {
++      "type": "Jeans",
++      "color": "Light blue",
++      "wash": "Light wash",
++      "fit": "Relaxed"
++    },
++    "shoes": {
++      "type": "Sneakers",
++      "color": "White"
++    },
++    "season": ["Spring", "Summer"],
++    "occasion": ["Casual", "Errands", "Coffee"],
++    "style": ["Minimal", "Streetwear", "Everyday"],
++    "keywords": ["boxy tee", "basics", "white and blue", "simple", "clean"],
++    "notes": "Boxy tee plus relaxed jeans, the default warm weather uniform."
++  },
++  {
++    "id": 12,
++    "image": "Images/Picture13.png",
++    "title": "Cream tee with charcoal trousers",
++    "top": {
++      "type": "T-shirt",
++      "color": "Cream",
++      "fit": "Regular"
++    },
++    "bottom": {
++      "type": "Trousers",
++      "color": "Charcoal",
++      "fit": "Tapered"
++    },
++    "shoes": {
++      "type": "Sneakers",
++      "color": "White",
++      "material": "Leather"
++    },
++    "accessories": ["Silver chain necklace"],
++    "season": ["Spring", "Summer", "Fall"],
++    "occasion": ["Smart casual", "Office", "Coffee"],
++    "style": ["Minimal", "Scandinavian", "Clean"],
++    "keywords": ["grey pants", "off white", "neutral", "tidy", "understated"],
++    "notes": "Swapping jeans for trousers instantly makes a plain tee look intentional."
++  },
++  {
++    "id": 13,
++    "image": "Images/Picture14.png",
++    "title": "Navy short sleeve shirt with white jeans",
++    "top": {
++      "type": "Button-up shirt",
++      "color": "Navy",
++      "sleeve": "Short sleeve",
++      "fit": "Slim"
++    },
++    "bottom": {
++      "type": "Jeans",
++      "color": "White",
++      "fit": "Slim",
++      "detail": "Distressed"
++    },
++    "shoes": {
++      "type": "Sneakers",
++      "color": "White",
++      "material": "Canvas"
++    },
++    "accessories": ["Watch"],
++    "season": ["Summer"],
++    "occasion": ["Casual", "Vacation", "Date"],
++    "style": ["Coastal", "Preppy", "Summer"],
++    "keywords": ["white denim", "ripped jeans", "navy and white", "holiday", "bright"],
++    "notes": "White jeans need a strong top color to anchor them."
++  },
++  {
++    "id": 14,
++    "image": "Images/Picture15.png",
++    "title": "Black suit with a tee",
++    "outer": {
++      "type": "Blazer",
++      "color": "Black",
++      "fit": "Relaxed"
++    },
++    "top": {
++      "type": "T-shirt",
++      "color": "Black",
++      "fit": "Regular"
++    },
++    "bottom": {
++      "type": "Suit trousers",
++      "color": "Black",
++      "fit": "Wide leg"
++    },
++    "shoes": {
++      "type": "Loafers",
++      "color": "Black",
++      "material": "Leather"
++    },
++    "accessories": ["Silver buckle belt", "Silver chain necklace"],
++    "season": ["Fall", "Winter"],
++    "occasion": ["Formal", "Night out", "Event", "Dinner"],
++    "style": ["Monochrome", "Tailored", "Sleek", "Modern"],
++    "keywords": ["all black", "suit without shirt", "no tie", "wide trousers", "evening"],
++    "notes": "A tee under the jacket keeps a black suit from feeling like business wear."
++  },
++  {
++    "id": 15,
++    "image": "Images/Picture16.png",
++    "title": "Navy shirt jacket with light denim",
++    "outer": {
++      "type": "Shirt jacket",
++      "color": "Navy",
++      "material": "Suede",
++      "fit": "Regular"
++    },
++    "top": {
++      "type": "T-shirt",
++      "color": "Navy",
++      "fit": "Regular"
++    },
++    "bottom": {
++      "type": "Jeans",
++      "color": "Light blue",
++      "wash": "Light wash",
++      "fit": "Straight"
++    },
++    "shoes": {
++      "type": "Chelsea boots",
++      "color": "Black",
++      "material": "Leather"
++    },
++    "accessories": ["Black leather belt"],
++    "season": ["Spring", "Fall"],
++    "occasion": ["Casual", "Smart casual"],
++    "style": ["Rugged", "Classic", "Tonal"],
++    "keywords": ["tonal navy", "suede", "chore jacket", "light denim", "boots"],
++    "notes": "Matching the jacket and tee shade makes the light denim pop."
++  },
++  {
++    "id": 16,
++    "image": "Images/Picture17.png",
++    "title": "Windowpane blazer with jeans",
++    "outer": {
++      "type": "Blazer",
++      "color": "Grey",
++      "pattern": "Windowpane check",
++      "fit": "Slim"
++    },
++    "top": {
++      "type": "T-shirt",
++      "color": "White",
++      "fit": "Regular"
++    },
++    "bottom": {
++      "type": "Jeans",
++      "color": "Light blue",
++      "wash": "Light wash",
++      "fit": "Straight"
++    },
++    "shoes": {
++      "type": "Loafers",
++      "color": "Black",
++      "material": "Leather"
++    },
++    "accessories": ["Silver buckle belt", "Pendant necklace", "Pocket square"],
++    "season": ["Spring", "Fall"],
++    "occasion": ["Smart casual", "Dinner", "Drinks"],
++    "style": ["Relaxed tailoring", "Classic", "Pattern"],
++    "keywords": ["check blazer", "sport coat with jeans", "patterned jacket", "dressed up denim"],
++    "notes": "A patterned jacket is the statement, so everything else stays plain."
++  },
++  {
++    "id": 17,
++    "image": "Images/Picture18.png",
++    "title": "Camel blazer with cream trousers",
++    "outer": {
++      "type": "Blazer",
++      "color": "Camel",
++      "fit": "Regular"
++    },
++    "top": {
++      "type": "T-shirt",
++      "color": "Navy",
++      "fit": "Regular"
++    },
++    "bottom": {
++      "type": "Trousers",
++      "color": "Cream",
++      "fit": "Straight"
++    },
++    "shoes": {
++      "type": "Loafers",
++      "color": "Brown",
++      "material": "Suede"
++    },
++    "accessories": ["Brown leather belt", "Gold chain necklace"],
++    "season": ["Spring", "Summer"],
++    "occasion": ["Smart casual", "Wedding guest", "Dinner"],
++    "style": ["Italian", "Warm neutrals", "Relaxed tailoring"],
++    "keywords": ["tan blazer", "off white pants", "brown and navy", "summer tailoring"],
++    "notes": "Camel over navy over cream, three warm tones that never fight."
++  },
++  {
++    "id": 18,
++    "image": "Images/Picture19.png",
++    "title": "Denim jacket with flannel and sweat shorts",
++    "outer": {
++      "type": "Denim jacket",
++      "color": "Light blue",
++      "wash": "Light wash",
++      "fit": "Regular"
++    },
++    "top": {
++      "type": "Flannel shirt",
++      "color": "Burgundy",
++      "pattern": "Plaid",
++      "fit": "Regular"
++    },
++    "bottom": {
++      "type": "Shorts",
++      "color": "Grey",
++      "material": "Sweat",
++      "fit": "Relaxed"
++    },
++    "shoes": {
++      "type": "Boat shoes",
++      "color": "White"
++    },
++    "season": ["Spring", "Summer"],
++    "occasion": ["Casual", "Beach", "Weekend"],
++    "style": ["Californian", "Layered", "Relaxed"],
++    "keywords": ["beach", "plaid under denim", "cool evening", "coastal", "sweat shorts"],
++    "notes": "Layers on top with shorts below works for cool mornings by the water."
++  },
++  {
++    "id": 19,
++    "image": "Images/Picture20.png",
++    "title": "White linen shirt with black shorts",
++    "top": {
++      "type": "Linen shirt",
++      "color": "White",
++      "sleeve": "Long sleeve",
++      "fit": "Relaxed",
++      "detail": "Sleeves rolled, worn open"
++    },
++    "bottom": {
++      "type": "Shorts",
++      "color": "Black",
++      "fit": "Relaxed"
++    },
++    "accessories": ["Pendant necklace", "Bracelet"],
++    "season": ["Summer"],
++    "occasion": ["Vacation", "Beach", "Dinner", "Date"],
++    "style": ["Resort", "Minimal", "Coastal"],
++    "keywords": ["linen", "holiday", "rolled sleeves", "black and white", "warm evening"],
++    "notes": "Open linen shirt over shorts, the easiest hot weather look."
++  },
++  {
++    "id": 20,
++    "image": "Images/Picture21.png",
++    "title": "Knit polo with navy shorts",
++    "top": {
++      "type": "Polo shirt",
++      "color": "Cream",
++      "material": "Knit",
++      "sleeve": "Short sleeve",
++      "fit": "Regular"
++    },
++    "bottom": {
++      "type": "Shorts",
++      "color": "Navy",
++      "fit": "Regular"
++    },
++    "shoes": {
++      "type": "Slides",
++      "color": "Cream",
++      "material": "Leather"
++    },
++    "season": ["Summer"],
++    "occasion": ["Casual", "Vacation", "Coffee"],
++    "style": ["Resort", "Minimal", "Warm neutrals"],
++    "keywords": ["knit polo", "beige and navy", "sandals", "poolside", "relaxed"],
++    "notes": "Knit polos dress up shorts more than a T-shirt does."
++  },
++  {
++    "id": 21,
++    "image": "Images/Picture22.png",
++    "title": "Black tee and shorts with woven loafers",
++    "top": {
++      "type": "T-shirt",
++      "color": "Black",
++      "fit": "Regular"
++    },
++    "bottom": {
++      "type": "Shorts",
++      "color": "Black",
++      "fit": "Regular"
++    },
++    "shoes": {
++      "type": "Loafers",
++      "color": "Tan",
++      "material": "Raffia"
++    },
++    "accessories": ["Silver chain necklace"],
++    "season": ["Summer"],
++    "occasion": ["Casual", "Vacation", "Dinner"],
++    "style": ["Monochrome", "Minimal", "Resort"],
++    "keywords": ["all black", "woven shoes", "no socks", "simple", "one contrast piece"],
++    "notes": "All black plus one natural texture at the feet."
++  },
++  {
++    "id": 22,
++    "image": "Images/Picture23.png",
++    "title": "Black tee with linen shorts",
++    "top": {
++      "type": "T-shirt",
++      "color": "Black",
++      "fit": "Regular"
++    },
++    "bottom": {
++      "type": "Shorts",
++      "color": "Cream",
++      "material": "Linen",
++      "fit": "Relaxed",
++      "detail": "Drawstring"
++    },
++    "shoes": {
++      "type": "Loafers",
++      "color": "Black",
++      "material": "Suede"
++    },
++    "accessories": ["Sunglasses", "Silver chain necklace"],
++    "season": ["Summer"],
++    "occasion": ["Casual", "Vacation", "Dinner"],
++    "style": ["Minimal", "Resort", "Clean"],
++    "keywords": ["linen shorts", "black and cream", "high contrast", "hot weather"],
++    "notes": "Drawstring linen shorts still look sharp with a hard shoe."
++  },
++  {
++    "id": 23,
++    "image": "Images/Picture24.png",
++    "title": "Brown sweatshirt with grey sweat shorts",
++    "top": {
++      "type": "Sweatshirt",
++      "color": "Brown",
++      "material": "Fleece",
++      "fit": "Relaxed"
++    },
++    "bottom": {
++      "type": "Shorts",
++      "color": "Grey",
++      "material": "Sweat",
++      "fit": "Relaxed",
++      "detail": "Drawstring"
++    },
++    "shoes": {
++      "type": "Sneakers",
++      "color": "White",
++      "detail": "Worn with white crew socks"
++    },
++    "accessories": ["Gold chain necklace", "Sunglasses"],
++    "season": ["Spring", "Summer"],
++    "occasion": ["Casual", "Errands", "Weekend"],
++    "style": ["Athleisure", "Streetwear", "Comfort"],
++    "keywords": ["sweat set", "brown and grey", "white socks", "lazy day", "comfortable"],
++    "notes": "Warm brown keeps grey sweats from looking like gym kit."
++  },
++  {
++    "id": 24,
++    "image": "Images/Picture25.png",
++    "title": "Textured knit with white shorts",
++    "top": {
++      "type": "Knit sweater",
++      "color": "Cream",
++      "sleeve": "Short sleeve",
++      "material": "Ribbed knit",
++      "fit": "Oversized"
++    },
++    "bottom": {
++      "type": "Shorts",
++      "color": "White",
++      "fit": "Relaxed"
++    },
++    "accessories": ["Pendant necklace", "Bracelet"],
++    "season": ["Summer"],
++    "occasion": ["Vacation", "Casual", "Dinner"],
++    "style": ["Resort", "Tonal", "Minimal"],
++    "keywords": ["all cream", "tonal", "texture", "boxy", "holiday", "monochrome"],
++    "notes": "Tonal cream on cream works because the two textures differ."
++  },
++  {
++    "id": 25,
++    "image": "Images/Picture26.png",
++    "title": "Tan overshirt with navy shorts",
++    "outer": {
++      "type": "Overshirt",
++      "color": "Tan",
++      "fit": "Relaxed",
++      "detail": "Sleeves rolled"
++    },
++    "top": {
++      "type": "T-shirt",
++      "color": "White",
++      "fit": "Relaxed"
++    },
++    "bottom": {
++      "type": "Shorts",
++      "color": "Navy",
++      "fit": "Regular"
++    },
++    "shoes": {
++      "type": "Sneakers",
++      "color": "White",
++      "material": "Leather"
++    },
++    "accessories": ["Pendant necklace"],
++    "season": ["Spring", "Summer"],
++    "occasion": ["Casual", "Coffee", "Weekend"],
++    "style": ["Minimal", "Warm neutrals", "Everyday"],
++    "keywords": ["shorts with a shirt", "beige", "layered", "clean", "coffee date"],
++    "notes": "A light overshirt makes shorts look deliberate rather than thrown on."
++  }
++]
+diff --git a/index.html b/index.html
+index e69de29..13dac0f 100644
+--- a/index.html
++++ b/index.html
+@@ -0,0 +1,73 @@
++<!DOCTYPE html>
++<html lang="en">
++<head>
++  <meta charset="UTF-8">
++  <meta name="viewport" content="width=device-width, initial-scale=1">
++  <meta name="theme-color" content="#101215">
++  <meta name="description" content="A personal library of outfit inspiration, searchable across every attribute.">
++  <title>Outfit Library</title>
++  <link rel="stylesheet" href="style.css">
++</head>
++<body>
++
++  <header class="header">
++    <div class="header-inner">
++      <div class="brand">
++        <span class="brand-mark" aria-hidden="true"></span>
++        <h1 class="brand-name">Outfit&nbsp;Library</h1>
++      </div>
++
++      <div class="search-wrap">
++        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
++          <circle cx="11" cy="11" r="7"></circle>
++          <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
++        </svg>
++        <input
++          type="search"
++          id="search"
++          class="search-input"
++          placeholder="Search black summer, oversized, coffee…"
++          autocomplete="off"
++          autocapitalize="off"
++          spellcheck="false"
++          aria-label="Search outfits">
++        <button type="button" id="clear-search" class="clear-btn" aria-label="Clear search" hidden>&times;</button>
++      </div>
++
++      <p class="count" id="count" aria-live="polite"></p>
++    </div>
++  </header>
++
++  <main class="main">
++    <p class="status" id="status">Loading outfits…</p>
++    <div class="gallery" id="gallery"></div>
++    <p class="empty" id="empty" hidden>
++      No outfits match that search.<br>
++      <span class="empty-hint">Try fewer words, or a different colour, season or style.</span>
++    </p>
++  </main>
++
++  <footer class="footer">
++    <p>Every word you type must appear somewhere in the outfit. Use quotes for exact phrases, or <code>field:value</code> like <code>season:summer</code>.</p>
++  </footer>
++
++  <!-- Lightbox -->
++  <div class="lightbox" id="lightbox" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="lb-title">
++    <button type="button" class="lb-close" id="lb-close" aria-label="Close preview">&times;</button>
++    <button type="button" class="lb-nav lb-prev" id="lb-prev" aria-label="Previous outfit">&#8249;</button>
++    <button type="button" class="lb-nav lb-next" id="lb-next" aria-label="Next outfit">&#8250;</button>
++
++    <div class="lb-panel" id="lb-panel">
++      <div class="lb-image-wrap">
++        <img class="lb-image" id="lb-image" src="" alt="">
++      </div>
++      <div class="lb-details" id="lb-details">
++        <h2 class="lb-title" id="lb-title"></h2>
++        <dl class="lb-list" id="lb-list"></dl>
++      </div>
++    </div>
++  </div>
++
++  <script src="script.js"></script>
++</body>
++</html>
+diff --git a/script.js b/script.js
+new file mode 100644
+index 0000000..376d934
+--- /dev/null
++++ b/script.js
+@@ -0,0 +1,475 @@
++/* ==========================================================================
++   Outfit Library
++   Loads data.json once, then filters entirely in memory.
++
++   The search index is built by walking each outfit object recursively, so any
++   attribute added to data.json later becomes searchable without touching this
++   file.
++   ========================================================================== */
++
++(function () {
++  'use strict';
++
++  var DATA_URL = 'data.json';
++
++  /* Keys that describe the file rather than the outfit. Indexed nowhere so a
++     search for "png" or "picture" doesn't match every card. */
++  var IGNORED_KEYS = { image: true };
++
++  /* Order preferred in the lightbox; anything not listed is appended after,
++     in the order it appears in the JSON. */
++  var FIELD_ORDER = [
++    'outer', 'top', 'mid', 'bottom', 'shoes', 'accessories',
++    'season', 'occasion', 'style', 'keywords', 'notes'
++  ];
++
++  var outfits = [];      // raw records, each with a private _search index
++  var visible = [];      // currently filtered records, in gallery order
++  var lightboxIndex = -1;
++  var lastFocused = null;
++
++  var els = {
++    gallery: document.getElementById('gallery'),
++    search: document.getElementById('search'),
++    clear: document.getElementById('clear-search'),
++    count: document.getElementById('count'),
++    status: document.getElementById('status'),
++    empty: document.getElementById('empty'),
++    lightbox: document.getElementById('lightbox'),
++    lbPanel: document.getElementById('lb-panel'),
++    lbImage: document.getElementById('lb-image'),
++    lbTitle: document.getElementById('lb-title'),
++    lbList: document.getElementById('lb-list'),
++    lbDetails: document.getElementById('lb-details'),
++    lbClose: document.getElementById('lb-close'),
++    lbPrev: document.getElementById('lb-prev'),
++    lbNext: document.getElementById('lb-next')
++  };
++
++  /* ------------------------------------------------------------------------
++     Text helpers
++     ---------------------------------------------------------------------- */
++
++  function normalize(value) {
++    return String(value)
++      .toLowerCase()
++      .normalize('NFD')
++      .replace(/[\u0300-\u036f]/g, '')   // drop accents
++      .replace(/\s+/g, ' ')
++      .trim();
++  }
++
++  /* "T-shirt" also needs to match a search for "tshirt", so every phrase is
++     stored twice: as written, and with punctuation removed. */
++  function variants(value) {
++    var base = normalize(value);
++    var stripped = base.replace(/[^a-z0-9 ]+/g, '');
++    return stripped && stripped !== base ? [base, stripped] : [base];
++  }
++
++  function prettyLabel(key) {
++    var spaced = key.replace(/[_.]/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2');
++    return spaced.charAt(0).toUpperCase() + spaced.slice(1);
++  }
++
++  /* ------------------------------------------------------------------------
++     Indexing — walk anything, at any depth
++     ---------------------------------------------------------------------- */
++
++  function walk(value, path, fields) {
++    if (value === null || value === undefined || value === '') return;
++
++    if (Array.isArray(value)) {
++      value.forEach(function (item) { walk(item, path, fields); });
++      return;
++    }
++
++    if (typeof value === 'object') {
++      Object.keys(value).forEach(function (key) {
++        if (path.length === 0 && IGNORED_KEYS[key]) return;
++        walk(value[key], path.concat(key), fields);
++      });
++      return;
++    }
++
++    fields.push({ path: path.join('.'), text: String(value) });
++  }
++
++  function buildIndex(outfit) {
++    var fields = [];
++    walk(outfit, [], fields);
++
++    var parts = [];
++    fields.forEach(function (field) {
++      /* Field names are searchable too, so "season" or "top.color" hit even
++         though the user never has to type them. */
++      parts.push(field.path.replace(/\./g, ' '));
++      parts.push(field.path);
++      parts.push(field.text);
++    });
++
++    var haystack = [];
++    parts.forEach(function (part) {
++      variants(part).forEach(function (v) { haystack.push(v); });
++    });
++
++    return {
++      haystack: ' ' + haystack.join(' ') + ' ',
++      fields: fields.map(function (field) {
++        return { path: normalize(field.path), text: variants(field.text).join(' ') };
++      })
++    };
++  }
++
++  /* ------------------------------------------------------------------------
++     Query parsing
++
++     - bare words are ANDed:            black summer
++     - "quoted phrases" match exactly:  "coffee date"
++     - field:value scopes one attribute: season:summer, color:black
++     ---------------------------------------------------------------------- */
++
++  function parseQuery(raw) {
++    var terms = [];
++    var pattern = /(?:([a-z0-9_.]+):)?(?:"([^"]*)"|(\S+))/gi;
++    var match;
++
++    while ((match = pattern.exec(raw)) !== null) {
++      var value = match[2] !== undefined ? match[2] : match[3];
++      if (!value) continue;
++
++      var normalized = normalize(value);
++      if (!normalized) continue;
++
++      terms.push({
++        field: match[1] ? normalize(match[1]) : null,
++        value: normalized,
++        alt: normalized.replace(/[^a-z0-9 ]+/g, '')
++      });
++    }
++
++    return terms;
++  }
++
++  function termMatches(index, term) {
++    if (term.field) {
++      return index.fields.some(function (field) {
++        if (field.path.indexOf(term.field) === -1) return false;
++        return field.text.indexOf(term.value) !== -1 ||
++               (term.alt && field.text.indexOf(term.alt) !== -1);
++      });
++    }
++
++    return index.haystack.indexOf(term.value) !== -1 ||
++           (!!term.alt && index.haystack.indexOf(term.alt) !== -1);
++  }
++
++  function filter(query) {
++    var terms = parseQuery(query);
++    if (terms.length === 0) return outfits.slice();
++
++    return outfits.filter(function (outfit) {
++      return terms.every(function (term) {
++        return termMatches(outfit._index, term);
++      });
++    });
++  }
++
++  /* ------------------------------------------------------------------------
++     Gallery
++     ---------------------------------------------------------------------- */
++
++  function makeTag(text, accent) {
++    var span = document.createElement('span');
++    span.className = accent ? 'tag tag-accent' : 'tag';
++    span.textContent = text;
++    return span;
++  }
++
++  function buildCard(outfit, position) {
++    var card = document.createElement('button');
++    card.type = 'button';
++    card.className = 'card';
++    card.dataset.position = String(position);
++    card.setAttribute('aria-label', 'Open outfit ' + outfit.id +
++      (outfit.title ? ': ' + outfit.title : ''));
++
++    var img = document.createElement('img');
++    img.className = 'card-image';
++    img.src = outfit.image;
++    img.alt = outfit.title || ('Outfit ' + outfit.id);
++    img.loading = 'lazy';
++    img.decoding = 'async';
++    /* Reserve roughly the right space so the masonry columns don't jump while
++       lazy images arrive; released once the real ratio is known. */
++    img.style.aspectRatio = '2 / 3';
++    img.addEventListener('load', function () { img.style.aspectRatio = ''; }, { once: true });
++    card.appendChild(img);
++
++    var body = document.createElement('div');
++    body.className = 'card-body';
++
++    var head = document.createElement('div');
++    head.className = 'card-head';
++
++    var title = document.createElement('h2');
++    title.className = 'card-title';
++    title.textContent = outfit.title || ('Outfit ' + outfit.id);
++    head.appendChild(title);
++
++    if (outfit.id !== undefined) {
++      var id = document.createElement('span');
++      id.className = 'card-id';
++      id.textContent = '#' + outfit.id;
++      head.appendChild(id);
++    }
++
++    body.appendChild(head);
++
++    var seasons = Array.isArray(outfit.season) ? outfit.season : [];
++    var styles = Array.isArray(outfit.style) ? outfit.style : [];
++
++    if (seasons.length || styles.length) {
++      var tags = document.createElement('div');
++      tags.className = 'tags';
++      seasons.forEach(function (season) { tags.appendChild(makeTag(season, false)); });
++      styles.forEach(function (style) { tags.appendChild(makeTag(style, true)); });
++      body.appendChild(tags);
++    }
++
++    card.appendChild(body);
++    return card;
++  }
++
++  function render(list) {
++    visible = list;
++
++    var fragment = document.createDocumentFragment();
++    list.forEach(function (outfit, position) {
++      fragment.appendChild(buildCard(outfit, position));
++    });
++
++    els.gallery.textContent = '';
++    els.gallery.appendChild(fragment);
++
++    els.empty.hidden = list.length > 0;
++
++    var total = outfits.length;
++    els.count.textContent = list.length === total
++      ? total + (total === 1 ? ' outfit' : ' outfits')
++      : list.length + ' of ' + total;
++  }
++
++  /* ------------------------------------------------------------------------
++     Lightbox
++     ---------------------------------------------------------------------- */
++
++  function describe(value) {
++    if (Array.isArray(value)) {
++      return value.filter(function (v) { return v !== null && v !== ''; }).join(', ');
++    }
++    if (value && typeof value === 'object') {
++      return Object.keys(value)
++        .map(function (key) { return value[key]; })
++        .filter(function (v) { return v !== null && v !== undefined && v !== ''; })
++        .join(' · ');
++    }
++    return String(value);
++  }
++
++  function detailKeys(outfit) {
++    var keys = Object.keys(outfit).filter(function (key) {
++      return key !== 'image' && key !== 'id' && key !== 'title' && key.charAt(0) !== '_';
++    });
++
++    return keys.sort(function (a, b) {
++      var ia = FIELD_ORDER.indexOf(a);
++      var ib = FIELD_ORDER.indexOf(b);
++      if (ia === -1 && ib === -1) return keys.indexOf(a) - keys.indexOf(b);
++      if (ia === -1) return 1;
++      if (ib === -1) return -1;
++      return ia - ib;
++    });
++  }
++
++  function fillDetails(outfit) {
++    els.lbTitle.textContent = (outfit.title || 'Outfit') +
++      (outfit.id !== undefined ? ' · #' + outfit.id : '');
++
++    els.lbList.textContent = '';
++
++    detailKeys(outfit).forEach(function (key) {
++      var text = describe(outfit[key]);
++      if (!text) return;
++
++      var row = document.createElement('div');
++      row.className = 'lb-row';
++
++      var dt = document.createElement('dt');
++      dt.textContent = prettyLabel(key);
++
++      var dd = document.createElement('dd');
++      dd.textContent = text;
++
++      row.appendChild(dt);
++      row.appendChild(dd);
++      els.lbList.appendChild(row);
++    });
++  }
++
++  function showAt(position) {
++    if (position < 0 || position >= visible.length) return;
++
++    lightboxIndex = position;
++    var outfit = visible[position];
++
++    els.lbImage.src = outfit.image;
++    els.lbImage.alt = outfit.title || ('Outfit ' + outfit.id);
++    fillDetails(outfit);
++
++    els.lbPrev.hidden = visible.length < 2;
++    els.lbNext.hidden = visible.length < 2;
++    els.lbDetails.scrollTop = 0;
++  }
++
++  function openLightbox(position) {
++    lastFocused = document.activeElement;
++    els.lightbox.hidden = false;
++    els.lightbox.setAttribute('aria-hidden', 'false');
++    document.body.classList.add('lb-open');
++    showAt(position);
++    els.lbClose.focus();
++  }
++
++  function closeLightbox() {
++    if (els.lightbox.hidden) return;
++
++    els.lightbox.hidden = true;
++    els.lightbox.setAttribute('aria-hidden', 'true');
++    document.body.classList.remove('lb-open');
++    els.lbImage.src = '';
++    lightboxIndex = -1;
++
++    if (lastFocused && document.contains(lastFocused)) {
++      lastFocused.focus();
++    }
++    lastFocused = null;
++  }
++
++  function step(delta) {
++    if (visible.length < 2) return;
++    var next = (lightboxIndex + delta + visible.length) % visible.length;
++    showAt(next);
++  }
++
++  /* Keep Tab inside the dialog while it's open. */
++  function trapFocus(event) {
++    var focusable = [els.lbClose, els.lbPrev, els.lbNext].filter(function (el) {
++      return !el.hidden;
++    });
++    if (focusable.length === 0) return;
++
++    var first = focusable[0];
++    var last = focusable[focusable.length - 1];
++
++    if (event.shiftKey && document.activeElement === first) {
++      event.preventDefault();
++      last.focus();
++    } else if (!event.shiftKey && document.activeElement === last) {
++      event.preventDefault();
++      first.focus();
++    } else if (focusable.indexOf(document.activeElement) === -1) {
++      event.preventDefault();
++      first.focus();
++    }
++  }
++
++  /* ------------------------------------------------------------------------
++     Events
++     ---------------------------------------------------------------------- */
++
++  function applySearch() {
++    var query = els.search.value;
++    els.clear.hidden = query.length === 0;
++    render(filter(query));
++  }
++
++  els.search.addEventListener('input', applySearch);
++
++  els.clear.addEventListener('click', function () {
++    els.search.value = '';
++    applySearch();
++    els.search.focus();
++  });
++
++  els.gallery.addEventListener('click', function (event) {
++    var card = event.target.closest('.card');
++    if (card) openLightbox(Number(card.dataset.position));
++  });
++
++  els.lbClose.addEventListener('click', closeLightbox);
++  els.lbPrev.addEventListener('click', function () { step(-1); });
++  els.lbNext.addEventListener('click', function () { step(1); });
++
++  /* Clicking the backdrop — anywhere outside the panel — closes. */
++  els.lightbox.addEventListener('click', function (event) {
++    if (!els.lbPanel.contains(event.target)) closeLightbox();
++  });
++
++  document.addEventListener('keydown', function (event) {
++    if (!els.lightbox.hidden) {
++      if (event.key === 'Escape') {
++        event.preventDefault();
++        closeLightbox();
++      } else if (event.key === 'ArrowLeft') {
++        step(-1);
++      } else if (event.key === 'ArrowRight') {
++        step(1);
++      } else if (event.key === 'Tab') {
++        trapFocus(event);
++      }
++      return;
++    }
++
++    /* "/" jumps to the search box, as on most gallery sites. */
++    if (event.key === '/' && document.activeElement !== els.search) {
++      event.preventDefault();
++      els.search.focus();
++      els.search.select();
++    } else if (event.key === 'Escape' && document.activeElement === els.search && els.search.value) {
++      els.search.value = '';
++      applySearch();
++    }
++  });
++
++  /* ------------------------------------------------------------------------
++     Boot
++     ---------------------------------------------------------------------- */
++
++  function fail(message) {
++    els.status.textContent = message;
++    els.status.hidden = false;
++  }
++
++  fetch(DATA_URL, { cache: 'no-cache' })
++    .then(function (response) {
++      if (!response.ok) throw new Error('HTTP ' + response.status);
++      return response.json();
++    })
++    .then(function (data) {
++      if (!Array.isArray(data)) throw new Error('data.json must contain an array');
++
++      outfits = data.map(function (outfit) {
++        outfit._index = buildIndex(outfit);
++        return outfit;
++      });
++
++      els.status.hidden = true;
++      applySearch();
++    })
++    .catch(function (error) {
++      fail('Could not load data.json (' + error.message + '). ' +
++           'If you opened index.html straight from disk, run a local server ' +
++           'instead — for example: python3 -m http.server');
++    });
++})();
+diff --git a/style.css b/style.css
+new file mode 100644
+index 0000000..301b437
+--- /dev/null
++++ b/style.css
+@@ -0,0 +1,538 @@
++/* ==========================================================================
++   Outfit Library — dark gallery theme
++   ========================================================================== */
++
++:root {
++  --bg:            #101215;
++  --bg-elevated:   #16191d;
++  --surface:       #1b1f24;
++  --surface-hover: #21262c;
++  --border:        #2a3037;
++  --text:          #ffffff;
++  --text-muted:    #9aa4b0;
++  --text-faint:    #6b7480;
++  --accent:        #3d8bfd;
++  --accent-soft:   rgba(61, 139, 253, 0.15);
++  --accent-ring:   rgba(61, 139, 253, 0.45);
++
++  --radius:    14px;
++  --radius-sm: 8px;
++  --header-h:  auto;
++
++  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
++}
++
++*,
++*::before,
++*::after { box-sizing: border-box; }
++
++html { -webkit-text-size-adjust: 100%; }
++
++body {
++  margin: 0;
++  background: var(--bg);
++  color: var(--text);
++  font-family: var(--font);
++  font-size: 16px;
++  line-height: 1.5;
++  -webkit-font-smoothing: antialiased;
++}
++
++:focus-visible {
++  outline: 2px solid var(--accent);
++  outline-offset: 2px;
++}
++
++/* --------------------------------------------------------------------------
++   Header
++   -------------------------------------------------------------------------- */
++
++.header {
++  position: sticky;
++  top: 0;
++  z-index: 20;
++  background: rgba(16, 18, 21, 0.85);
++  backdrop-filter: blur(12px);
++  -webkit-backdrop-filter: blur(12px);
++  border-bottom: 1px solid var(--border);
++}
++
++.header-inner {
++  max-width: 1500px;
++  margin: 0 auto;
++  padding: 14px 20px;
++  display: grid;
++  grid-template-columns: auto minmax(0, 1fr) auto;
++  align-items: center;
++  gap: 16px;
++}
++
++.brand {
++  display: flex;
++  align-items: center;
++  gap: 10px;
++  min-width: 0;
++}
++
++.brand-mark {
++  width: 12px;
++  height: 12px;
++  border-radius: 3px;
++  background: var(--accent);
++  box-shadow: 0 0 14px var(--accent-ring);
++  flex: none;
++}
++
++.brand-name {
++  margin: 0;
++  font-size: 1.05rem;
++  font-weight: 600;
++  letter-spacing: -0.01em;
++  white-space: nowrap;
++}
++
++/* Search ------------------------------------------------------------------ */
++
++.search-wrap {
++  position: relative;
++  display: flex;
++  align-items: center;
++  min-width: 0;
++}
++
++.search-icon {
++  position: absolute;
++  left: 14px;
++  width: 18px;
++  height: 18px;
++  fill: none;
++  stroke: var(--text-faint);
++  stroke-width: 2;
++  stroke-linecap: round;
++  pointer-events: none;
++  transition: stroke 0.15s ease;
++}
++
++.search-wrap:focus-within .search-icon { stroke: var(--accent); }
++
++.search-input {
++  width: 100%;
++  padding: 11px 40px 11px 42px;
++  font: inherit;
++  font-size: 0.95rem;
++  color: var(--text);
++  background: var(--surface);
++  border: 1px solid var(--border);
++  border-radius: 999px;
++  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
++}
++
++.search-input::placeholder { color: var(--text-faint); }
++
++.search-input:focus {
++  outline: none;
++  background: var(--bg-elevated);
++  border-color: var(--accent);
++  box-shadow: 0 0 0 3px var(--accent-soft);
++}
++
++/* Kill the browser's native search clear control; we ship our own. */
++.search-input::-webkit-search-decoration,
++.search-input::-webkit-search-cancel-button,
++.search-input::-webkit-search-results-button { -webkit-appearance: none; }
++
++.clear-btn {
++  position: absolute;
++  right: 8px;
++  width: 26px;
++  height: 26px;
++  display: grid;
++  place-items: center;
++  font-size: 1.25rem;
++  line-height: 1;
++  color: var(--text-muted);
++  background: transparent;
++  border: 0;
++  border-radius: 50%;
++  cursor: pointer;
++  transition: color 0.15s ease, background 0.15s ease;
++}
++
++.clear-btn:hover {
++  color: var(--text);
++  background: var(--surface-hover);
++}
++
++.count {
++  margin: 0;
++  font-size: 0.85rem;
++  color: var(--text-muted);
++  white-space: nowrap;
++  font-variant-numeric: tabular-nums;
++}
++
++/* --------------------------------------------------------------------------
++   Gallery (masonry via CSS columns — keeps full outfits uncropped)
++   -------------------------------------------------------------------------- */
++
++.main {
++  max-width: 1500px;
++  margin: 0 auto;
++  padding: 24px 20px 64px;
++}
++
++.gallery {
++  column-count: 4;
++  column-gap: 18px;
++}
++
++.card {
++  display: block;
++  width: 100%;
++  margin: 0 0 18px;
++  padding: 0;
++  text-align: left;
++  font: inherit;
++  color: inherit;
++  background: var(--surface);
++  border: 1px solid var(--border);
++  border-radius: var(--radius);
++  overflow: hidden;
++  cursor: pointer;
++  break-inside: avoid;
++  -webkit-column-break-inside: avoid;
++  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
++}
++
++.card:hover,
++.card:focus-visible {
++  transform: translateY(-3px);
++  border-color: var(--accent);
++  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
++}
++
++.card-image {
++  display: block;
++  width: 100%;
++  height: auto;
++  background: var(--bg-elevated);
++}
++
++.card-body {
++  padding: 10px 12px 12px;
++}
++
++.card-head {
++  display: flex;
++  align-items: baseline;
++  justify-content: space-between;
++  gap: 8px;
++}
++
++.card-title {
++  margin: 0;
++  font-size: 0.9rem;
++  font-weight: 500;
++  line-height: 1.35;
++  overflow: hidden;
++  display: -webkit-box;
++  -webkit-line-clamp: 2;
++  -webkit-box-orient: vertical;
++}
++
++.card-id {
++  flex: none;
++  font-size: 0.72rem;
++  color: var(--text-faint);
++  font-variant-numeric: tabular-nums;
++}
++
++.tags {
++  display: flex;
++  flex-wrap: wrap;
++  gap: 6px;
++  margin-top: 9px;
++}
++
++.tag {
++  padding: 3px 8px;
++  font-size: 0.72rem;
++  line-height: 1.4;
++  color: var(--text-muted);
++  background: var(--bg-elevated);
++  border: 1px solid var(--border);
++  border-radius: 999px;
++}
++
++.tag-accent {
++  color: var(--accent);
++  background: var(--accent-soft);
++  border-color: transparent;
++}
++
++/* Status / empty ---------------------------------------------------------- */
++
++.status,
++.empty {
++  margin: 48px 0;
++  text-align: center;
++  color: var(--text-muted);
++}
++
++.empty-hint {
++  font-size: 0.88rem;
++  color: var(--text-faint);
++}
++
++.footer {
++  padding: 0 20px 40px;
++  text-align: center;
++  color: var(--text-faint);
++  font-size: 0.8rem;
++}
++
++.footer code {
++  padding: 1px 5px;
++  border-radius: 4px;
++  background: var(--surface);
++  border: 1px solid var(--border);
++  font-size: 0.95em;
++}
++
++/* --------------------------------------------------------------------------
++   Lightbox
++   -------------------------------------------------------------------------- */
++
++.lightbox {
++  position: fixed;
++  inset: 0;
++  z-index: 50;
++  display: grid;
++  place-items: center;
++  padding: 24px;
++  background: rgba(8, 9, 11, 0.9);
++  backdrop-filter: blur(6px);
++  -webkit-backdrop-filter: blur(6px);
++  animation: fade 0.18s ease;
++}
++
++.lightbox[hidden] { display: none; }
++
++@keyframes fade { from { opacity: 0; } }
++
++.lb-panel {
++  display: flex;
++  align-items: stretch;
++  max-width: calc(100vw - 48px);
++  /* A definite height lets the image size itself to the panel, so the picture
++     column shrink-wraps instead of leaving black bars. */
++  height: min(880px, calc(100vh - 48px));
++  background: var(--bg-elevated);
++  border: 1px solid var(--border);
++  border-radius: var(--radius);
++  overflow: hidden;
++  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
++}
++
++.lb-image-wrap {
++  flex: 0 1 auto;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  background: #0b0d0f;
++  min-width: 0;
++  overflow: hidden;
++}
++
++.lb-image {
++  display: block;
++  height: 100%;
++  width: auto;
++  max-width: 100%;
++  object-fit: contain;
++}
++
++.lb-details {
++  flex: 0 1 340px;
++  min-width: 250px;
++  padding: 24px;
++  overflow-y: auto;
++  border-left: 1px solid var(--border);
++}
++
++.lb-title {
++  margin: 0 0 18px;
++  font-size: 1.1rem;
++  font-weight: 600;
++  line-height: 1.3;
++  padding-right: 28px;
++}
++
++.lb-list {
++  margin: 0;
++  display: grid;
++  gap: 14px;
++}
++
++.lb-row {
++  display: grid;
++  gap: 3px;
++}
++
++.lb-row dt {
++  font-size: 0.7rem;
++  font-weight: 600;
++  letter-spacing: 0.08em;
++  text-transform: uppercase;
++  color: var(--accent);
++}
++
++.lb-row dd {
++  margin: 0;
++  font-size: 0.9rem;
++  color: var(--text);
++}
++
++.lb-row dd .muted { color: var(--text-muted); }
++
++.lb-close,
++.lb-nav {
++  position: fixed;
++  z-index: 60;
++  display: grid;
++  place-items: center;
++  color: var(--text);
++  background: rgba(27, 31, 36, 0.85);
++  border: 1px solid var(--border);
++  border-radius: 50%;
++  cursor: pointer;
++  line-height: 1;
++  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
++}
++
++.lb-close:hover,
++.lb-nav:hover {
++  background: var(--accent);
++  border-color: var(--accent);
++  transform: scale(1.06);
++}
++
++.lb-close {
++  top: 18px;
++  right: 18px;
++  width: 40px;
++  height: 40px;
++  font-size: 1.6rem;
++  padding-bottom: 3px;
++}
++
++.lb-nav {
++  top: 50%;
++  translate: 0 -50%;
++  width: 44px;
++  height: 44px;
++  font-size: 1.7rem;
++  padding-bottom: 4px;
++}
++
++.lb-nav:hover { transform: scale(1.06); }
++
++.lb-prev { left: 18px; }
++.lb-next { right: 18px; }
++
++.lb-nav[hidden] { display: none; }
++
++body.lb-open { overflow: hidden; }
++
++/* --------------------------------------------------------------------------
++   Responsive
++   -------------------------------------------------------------------------- */
++
++@media (max-width: 1200px) {
++  .gallery { column-count: 3; }
++}
++
++@media (max-width: 860px) {
++  .header-inner {
++    grid-template-columns: 1fr auto;
++    grid-template-areas:
++      "brand count"
++      "search search";
++    gap: 12px;
++  }
++  .brand       { grid-area: brand; }
++  .count       { grid-area: count; }
++  .search-wrap { grid-area: search; }
++
++  .gallery {
++    column-count: 2;
++    column-gap: 14px;
++  }
++  .card { margin-bottom: 14px; }
++
++  /* Stack the lightbox so the image stays large on narrow screens. */
++  .lightbox { padding: 0; }
++
++  .lb-panel {
++    flex-direction: column;
++    width: 100%;
++    max-width: 100%;
++    height: 100%;
++    border: 0;
++    border-radius: 0;
++  }
++
++  .lb-image-wrap {
++    flex: 1 1 auto;
++    min-height: 0;
++  }
++
++  .lb-image {
++    width: 100%;
++    height: 100%;
++  }
++
++  .lb-details {
++    flex: 0 0 auto;
++    border-left: 0;
++    border-top: 1px solid var(--border);
++    max-height: 42vh;
++    padding: 18px 20px 28px;
++  }
++
++  .lb-close { top: 12px; right: 12px; }
++
++  .lb-nav {
++    top: auto;
++    bottom: 46vh;
++    translate: 0 0;
++    width: 40px;
++    height: 40px;
++  }
++
++  .lb-prev { left: 12px; }
++  .lb-next { right: 12px; }
++}
++
++@media (max-width: 560px) {
++  .main { padding: 18px 14px 48px; }
++  .header-inner { padding: 12px 14px; }
++  .gallery { column-count: 2; column-gap: 10px; }
++  .card { margin-bottom: 10px; }
++  .card-body { padding: 8px 9px 10px; }
++  .card-title { font-size: 0.82rem; }
++  .tag { font-size: 0.68rem; padding: 2px 7px; }
++}
++
++@media (max-width: 380px) {
++  .gallery { column-count: 1; }
++}
++
++@media (prefers-reduced-motion: reduce) {
++  *,
++  *::before,
++  *::after {
++    animation-duration: 0.01ms !important;
++    transition-duration: 0.01ms !important;
++  }
++}
+-- 
+2.43.0
+
