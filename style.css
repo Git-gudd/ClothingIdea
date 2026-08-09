@@ -17,7 +17,13 @@
 
   --radius:    14px;
   --radius-sm: 8px;
-  --header-h:  auto;
+
+  /* Every card uses one picture box so all cards end up the same height.
+     3/5 is the median shape of the photos. `contain` letterboxes rather than
+     crops — switch --card-fit to `cover` if you'd rather fill the box and lose
+     the top and bottom of the taller shots. */
+  --card-ratio: 3 / 5;
+  --card-fit:   contain;
 
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
@@ -25,6 +31,10 @@
 *,
 *::before,
 *::after { box-sizing: border-box; }
+
+/* An explicit `display` on a rule beats the hidden attribute's UA default, so
+   several elements here would stay painted while hidden. Settle it once. */
+[hidden] { display: none !important; }
 
 html { -webkit-text-size-adjust: 100%; }
 
@@ -172,7 +182,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Gallery (masonry via CSS columns — keeps full outfits uncropped)
+   Gallery — uniform grid, every card the same height
    -------------------------------------------------------------------------- */
 
 .main {
@@ -182,14 +192,17 @@ body {
 }
 
 .gallery {
-  column-count: 4;
-  column-gap: 18px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 18px;
 }
 
 .card {
-  display: block;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  margin: 0 0 18px;
+  height: 100%;
+  margin: 0;
   padding: 0;
   text-align: left;
   font: inherit;
@@ -199,8 +212,6 @@ body {
   border-radius: var(--radius);
   overflow: hidden;
   cursor: pointer;
-  break-inside: avoid;
-  -webkit-column-break-inside: avoid;
   transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
@@ -214,11 +225,16 @@ body {
 .card-image {
   display: block;
   width: 100%;
-  height: auto;
-  background: var(--bg-elevated);
+  aspect-ratio: var(--card-ratio);
+  object-fit: var(--card-fit);
+  background: #0b0d0f;
+  flex: none;
 }
 
+/* The body is a fixed height too, so cards match across rows and not just
+   within one. Overflowing tags are clipped; the lightbox has the full list. */
 .card-body {
+  flex: 1 1 auto;
   padding: 10px 12px 12px;
 }
 
@@ -234,6 +250,7 @@ body {
   font-size: 0.9rem;
   font-weight: 500;
   line-height: 1.35;
+  min-height: calc(2 * 1.35em);
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -250,8 +267,11 @@ body {
 .tags {
   display: flex;
   flex-wrap: wrap;
+  align-content: flex-start;
   gap: 6px;
   margin-top: 9px;
+  height: 50px;          /* exactly two rows of tags */
+  overflow: hidden;
 }
 
 .tag {
@@ -315,8 +335,6 @@ body {
   -webkit-backdrop-filter: blur(6px);
   animation: fade 0.18s ease;
 }
-
-.lightbox[hidden] { display: none; }
 
 @keyframes fade { from { opacity: 0; } }
 
@@ -395,6 +413,152 @@ body {
 
 .lb-row dd .muted { color: var(--text-muted); }
 
+/* Buttons ----------------------------------------------------------------- */
+
+.btn {
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 7px 13px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-primary {
+  color: #fff;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.btn-primary:hover { background: #2f7bea; }
+
+.btn-quiet {
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+.btn-quiet:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+/* Edit form --------------------------------------------------------------- */
+
+.lb-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-right: 28px;
+}
+
+.lb-head .lb-title { margin: 0; padding-right: 0; }
+
+.lb-form {
+  display: grid;
+  gap: 14px;
+}
+
+.field { display: grid; gap: 4px; }
+
+.field > label,
+.group > legend {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.field input,
+.field textarea,
+.add-field input,
+.add-field select {
+  font: inherit;
+  font-size: 0.88rem;
+  width: 100%;
+  padding: 7px 10px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.field textarea { resize: vertical; min-height: 68px; }
+
+.field .hint {
+  font-size: 0.7rem;
+  color: var(--text-faint);
+}
+
+.group {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: grid;
+  gap: 9px;
+}
+
+.group .field > label {
+  color: var(--text-muted);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.add-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  padding-top: 4px;
+}
+
+.form-actions {
+  position: sticky;
+  bottom: -18px;
+  display: flex;
+  gap: 8px;
+  padding: 14px 0 4px;
+  background: linear-gradient(to top, var(--bg-elevated) 70%, transparent);
+}
+
+/* Local-edits bar --------------------------------------------------------- */
+
+.edits-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  translate: -50% 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100vw - 28px);
+  padding: 10px 12px 10px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.edits-text {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
 .lb-close,
 .lb-nav {
   position: fixed;
@@ -440,8 +604,6 @@ body {
 .lb-prev { left: 18px; }
 .lb-next { right: 18px; }
 
-.lb-nav[hidden] { display: none; }
-
 body.lb-open { overflow: hidden; }
 
 /* --------------------------------------------------------------------------
@@ -449,7 +611,7 @@ body.lb-open { overflow: hidden; }
    -------------------------------------------------------------------------- */
 
 @media (max-width: 1200px) {
-  .gallery { column-count: 3; }
+  .gallery { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
 }
 
 @media (max-width: 860px) {
@@ -465,10 +627,9 @@ body.lb-open { overflow: hidden; }
   .search-wrap { grid-area: search; }
 
   .gallery {
-    column-count: 2;
-    column-gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 14px;
   }
-  .card { margin-bottom: 14px; }
 
   /* Stack the lightbox so the image stays large on narrow screens. */
   .lightbox { padding: 0; }
@@ -517,15 +678,14 @@ body.lb-open { overflow: hidden; }
 @media (max-width: 560px) {
   .main { padding: 18px 14px 48px; }
   .header-inner { padding: 12px 14px; }
-  .gallery { column-count: 2; column-gap: 10px; }
-  .card { margin-bottom: 10px; }
+  .gallery {
+    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+    gap: 10px;
+  }
   .card-body { padding: 8px 9px 10px; }
   .card-title { font-size: 0.82rem; }
   .tag { font-size: 0.68rem; padding: 2px 7px; }
-}
-
-@media (max-width: 380px) {
-  .gallery { column-count: 1; }
+  .tags { height: 46px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -23,10 +23,16 @@
     'season', 'occasion', 'style', 'keywords', 'notes'
   ];
 
+  /* Edits made in the browser live here until they're exported. GitHub Pages
+     serves files, it can't write them, so "saving" means keeping the change in
+     localStorage and letting you download a fresh data.json to commit. */
+  var STORE_KEY = 'outfitLibrary.edits.v1';
+
   var outfits = [];      // raw records, each with a private _search index
   var visible = [];      // currently filtered records, in gallery order
   var lightboxIndex = -1;
   var lastFocused = null;
+  var editing = false;
 
   var els = {
     gallery: document.getElementById('gallery'),
@@ -43,7 +49,13 @@
     lbDetails: document.getElementById('lb-details'),
     lbClose: document.getElementById('lb-close'),
     lbPrev: document.getElementById('lb-prev'),
-    lbNext: document.getElementById('lb-next')
+    lbNext: document.getElementById('lb-next'),
+    lbEdit: document.getElementById('lb-edit'),
+    lbForm: document.getElementById('lb-form'),
+    editsBar: document.getElementById('edits-bar'),
+    editsText: document.getElementById('edits-text'),
+    exportBtn: document.getElementById('export-btn'),
+    discardBtn: document.getElementById('discard-btn')
   };
 
   /* ------------------------------------------------------------------------
@@ -343,6 +355,7 @@
 
   function closeLightbox() {
     if (els.lightbox.hidden) return;
+    if (editing) closeEditor();
 
     els.lightbox.hidden = true;
     els.lightbox.setAttribute('aria-hidden', 'true');
@@ -357,15 +370,26 @@
   }
 
   function step(delta) {
-    if (visible.length < 2) return;
+    if (editing || visible.length < 2) return;
     var next = (lightboxIndex + delta + visible.length) % visible.length;
     showAt(next);
   }
 
-  /* Keep Tab inside the dialog while it's open. */
+  /* Keep Tab inside the dialog while it's open. Queried live so the edit
+     form's inputs join the cycle while it is open. */
   function trapFocus(event) {
-    var focusable = [els.lbClose, els.lbPrev, els.lbNext].filter(function (el) {
-      return !el.hidden;
+    var candidates = [els.lbClose, els.lbPrev, els.lbNext].concat(
+      Array.prototype.slice.call(
+        els.lightbox.querySelectorAll('input, select, textarea, button, [href]')
+      )
+    );
+
+    var seen = [];
+    var focusable = candidates.filter(function (el) {
+      if (!el || el.hidden || el.disabled || seen.indexOf(el) !== -1) return false;
+      if (el.closest('[hidden]')) return false;
+      seen.push(el);
+      return true;
     });
     if (focusable.length === 0) return;
 
@@ -382,6 +406,273 @@
       event.preventDefault();
       first.focus();
     }
+  }
+
+  /* ------------------------------------------------------------------------
+     Editing
+
+     The form is generated from whatever the record actually contains, so a
+     field you invent in data.json gets an input automatically. Types are
+     preserved on save: arrays stay arrays, groups stay nested objects.
+     ---------------------------------------------------------------------- */
+
+  /* A copy without the internal _index, ready to serialise. */
+  function plain(outfit) {
+    var copy = {};
+    Object.keys(outfit).forEach(function (key) {
+      if (key.charAt(0) !== '_') copy[key] = outfit[key];
+    });
+    return copy;
+  }
+
+  function readStore() {
+    try {
+      return JSON.parse(localStorage.getItem(STORE_KEY)) || {};
+    } catch (error) {
+      return {};
+    }
+  }
+
+  function writeStore(store) {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(store));
+      return true;
+    } catch (error) {
+      window.alert('Could not save locally: ' + error.message +
+        '\n\nDownload data.json now so the change is not lost.');
+      return false;
+    }
+  }
+
+  function refreshEditsBar() {
+    var count = Object.keys(readStore()).length;
+    els.editsBar.hidden = count === 0;
+    els.editsText.textContent = count === 1
+      ? '1 outfit edited in this browser'
+      : count + ' outfits edited in this browser';
+  }
+
+  function makeField(labelText, value, hint) {
+    var wrap = document.createElement('div');
+    wrap.className = 'field';
+
+    var id = 'f_' + Math.random().toString(36).slice(2, 9);
+
+    var label = document.createElement('label');
+    label.textContent = labelText;
+    label.htmlFor = id;
+    wrap.appendChild(label);
+
+    var multiline = String(value).length > 60;
+    var input = document.createElement(multiline ? 'textarea' : 'input');
+    if (!multiline) input.type = 'text';
+    input.id = id;
+    input.value = value;
+    wrap.appendChild(input);
+
+    if (hint) {
+      var note = document.createElement('span');
+      note.className = 'hint';
+      note.textContent = hint;
+      wrap.appendChild(note);
+    }
+
+    return { wrap: wrap, input: input };
+  }
+
+  /* Builds the form and returns a reader that turns it back into a record. */
+  function buildForm(outfit) {
+    els.lbForm.textContent = '';
+    var readers = [];
+
+    var keys = ['title'].concat(detailKeys(outfit));
+
+    keys.forEach(function (key) {
+      var value = outfit[key];
+      if (value === undefined) return;
+
+      if (Array.isArray(value)) {
+        var listField = makeField(prettyLabel(key), value.join(', '), 'Separate with commas');
+        els.lbForm.appendChild(listField.wrap);
+        readers.push(function (target) {
+          target[key] = listField.input.value
+            .split(',')
+            .map(function (part) { return part.trim(); })
+            .filter(Boolean);
+        });
+        return;
+      }
+
+      if (value && typeof value === 'object') {
+        var group = document.createElement('fieldset');
+        group.className = 'group';
+
+        var legend = document.createElement('legend');
+        legend.textContent = prettyLabel(key);
+        group.appendChild(legend);
+
+        var subReaders = [];
+        Object.keys(value).forEach(function (subKey) {
+          var subField = makeField(prettyLabel(subKey), value[subKey]);
+          group.appendChild(subField.wrap);
+          subReaders.push(function (target) {
+            var text = subField.input.value.trim();
+            if (text) target[subKey] = text;
+          });
+        });
+
+        els.lbForm.appendChild(group);
+        readers.push(function (target) {
+          var nested = {};
+          subReaders.forEach(function (read) { read(nested); });
+          if (Object.keys(nested).length) target[key] = nested;
+          else delete target[key];
+        });
+        return;
+      }
+
+      var field = makeField(prettyLabel(key), value === null ? '' : value);
+      els.lbForm.appendChild(field.wrap);
+      readers.push(function (target) { target[key] = field.input.value.trim(); });
+    });
+
+    /* Adding an attribute keeps the schema open-ended without editing code. */
+    var adder = document.createElement('div');
+    adder.className = 'add-field';
+
+    var nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.placeholder = 'New attribute, e.g. fabric';
+
+    var typeSelect = document.createElement('select');
+    [['text', 'Text'], ['list', 'List'], ['group', 'Group']].forEach(function (option) {
+      var opt = document.createElement('option');
+      opt.value = option[0];
+      opt.textContent = option[1];
+      typeSelect.appendChild(opt);
+    });
+
+    var addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'btn btn-quiet';
+    addBtn.textContent = 'Add';
+
+    addBtn.addEventListener('click', function () {
+      var name = nameInput.value.trim().replace(/\s+/g, '_').toLowerCase();
+      if (!name) return;
+      if (Object.prototype.hasOwnProperty.call(outfit, name)) {
+        window.alert('"' + name + '" already exists on this outfit.');
+        return;
+      }
+
+      var kind = typeSelect.value;
+      outfit[name] = kind === 'list' ? [] : kind === 'group' ? { type: '' } : '';
+      openEditor(outfit);   // rebuild so the new field appears
+    });
+
+    adder.appendChild(nameInput);
+    adder.appendChild(typeSelect);
+    adder.appendChild(addBtn);
+    els.lbForm.appendChild(adder);
+
+    var actions = document.createElement('div');
+    actions.className = 'form-actions';
+
+    var save = document.createElement('button');
+    save.type = 'submit';
+    save.className = 'btn btn-primary';
+    save.textContent = 'Save';
+
+    var cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.className = 'btn btn-quiet';
+    cancel.textContent = 'Cancel';
+    cancel.addEventListener('click', closeEditor);
+
+    actions.appendChild(save);
+    actions.appendChild(cancel);
+    els.lbForm.appendChild(actions);
+
+    return function readForm() {
+      var target = plain(outfit);
+      readers.forEach(function (read) { read(target); });
+      return target;
+    };
+  }
+
+  var currentReader = null;
+
+  function openEditor(outfit) {
+    editing = true;
+    currentReader = buildForm(outfit);
+    els.lbList.hidden = true;
+    els.lbForm.hidden = false;
+    els.lbEdit.textContent = 'Editing';
+    els.lbEdit.disabled = true;
+    /* Navigating away mid-edit would silently drop what's been typed. */
+    els.lbPrev.disabled = true;
+    els.lbNext.disabled = true;
+    els.lbDetails.scrollTop = 0;
+  }
+
+  function closeEditor() {
+    editing = false;
+    currentReader = null;
+    els.lbForm.hidden = true;
+    els.lbForm.textContent = '';
+    els.lbList.hidden = false;
+    els.lbEdit.textContent = 'Edit';
+    els.lbEdit.disabled = false;
+    els.lbPrev.disabled = false;
+    els.lbNext.disabled = false;
+    if (lightboxIndex >= 0) fillDetails(visible[lightboxIndex]);
+  }
+
+  function saveEditor() {
+    if (!currentReader || lightboxIndex < 0) return;
+
+    var outfit = visible[lightboxIndex];
+    var updated = currentReader();
+
+    /* Replace the record's own keys in place so object identity — and the
+       position of the record inside `outfits` — is preserved. */
+    Object.keys(outfit).forEach(function (key) {
+      if (key.charAt(0) !== '_') delete outfit[key];
+    });
+    Object.keys(updated).forEach(function (key) { outfit[key] = updated[key]; });
+    outfit._index = buildIndex(outfit);
+
+    var store = readStore();
+    store[String(outfit.id)] = plain(outfit);
+    writeStore(store);
+    refreshEditsBar();
+
+    closeEditor();
+    applySearch();
+
+    /* The edit may have moved the outfit out of the current filter. */
+    var position = visible.indexOf(outfit);
+    if (position === -1) closeLightbox();
+    else showAt(position);
+  }
+
+  function exportData() {
+    var payload = JSON.stringify(outfits.map(plain), null, 2) + '\n';
+    var url = URL.createObjectURL(new Blob([payload], { type: 'application/json' }));
+
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = 'data.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function discardEdits() {
+    if (!window.confirm('Discard every edit made in this browser and reload the published data?')) return;
+    try { localStorage.removeItem(STORE_KEY); } catch (error) { /* nothing to do */ }
+    window.location.reload();
   }
 
   /* ------------------------------------------------------------------------
@@ -411,22 +702,40 @@
   els.lbPrev.addEventListener('click', function () { step(-1); });
   els.lbNext.addEventListener('click', function () { step(1); });
 
-  /* Clicking the backdrop — anywhere outside the panel — closes. */
+  els.lbEdit.addEventListener('click', function () {
+    if (lightboxIndex >= 0) openEditor(visible[lightboxIndex]);
+  });
+
+  els.lbForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    saveEditor();
+  });
+
+  els.exportBtn.addEventListener('click', exportData);
+  els.discardBtn.addEventListener('click', discardEdits);
+
+  /* Clicking the backdrop closes. Tested against the backdrop element itself
+     rather than "outside the panel", because a control that re-renders the
+     panel detaches its own node mid-click, which would otherwise read as a
+     click outside and close the dialog. */
   els.lightbox.addEventListener('click', function (event) {
-    if (!els.lbPanel.contains(event.target)) closeLightbox();
+    if (event.target === els.lightbox) closeLightbox();
   });
 
   document.addEventListener('keydown', function (event) {
     if (!els.lightbox.hidden) {
       if (event.key === 'Escape') {
         event.preventDefault();
-        closeLightbox();
-      } else if (event.key === 'ArrowLeft') {
-        step(-1);
-      } else if (event.key === 'ArrowRight') {
-        step(1);
+        /* Back out of the form first, so Escape never discards a half-typed
+           edit along with the whole dialog. */
+        if (editing) closeEditor();
+        else closeLightbox();
       } else if (event.key === 'Tab') {
         trapFocus(event);
+      } else if (!editing && event.key === 'ArrowLeft') {
+        step(-1);
+      } else if (!editing && event.key === 'ArrowRight') {
+        step(1);
       }
       return;
     }
@@ -459,12 +768,19 @@
     .then(function (data) {
       if (!Array.isArray(data)) throw new Error('data.json must contain an array');
 
+      /* Local edits win over the published file until they're exported and
+         committed, so a change survives a refresh. */
+      var store = readStore();
+
       outfits = data.map(function (outfit) {
-        outfit._index = buildIndex(outfit);
-        return outfit;
+        var saved = store[String(outfit.id)];
+        var record = saved ? saved : outfit;
+        record._index = buildIndex(record);
+        return record;
       });
 
       els.status.hidden = true;
+      refreshEditsBar();
       applySearch();
     })
     .catch(function (error) {

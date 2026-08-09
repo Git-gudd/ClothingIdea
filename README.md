@@ -66,6 +66,49 @@ Notes on the conventions used here:
   panel; anything else is appended in the order it appears in the JSON.
 - Gallery cards show `season` as plain tags and `style` as blue tags.
 
+## Card size
+
+Every card is the same height: one fixed picture box plus a fixed-height body.
+Two knobs at the top of `style.css` control it:
+
+```css
+--card-ratio: 3 / 5;    /* shape of the picture box */
+--card-fit:   contain;  /* contain = letterbox, cover = fill and crop */
+```
+
+The photos range from 0.40 to 0.74 wide-to-tall, so no single box fits them
+all. `contain` is the default because cropping a full-body outfit tends to cut
+off the shoes or the head; the bars it leaves are near-invisible on the dark
+background. Switch to `cover` for a tighter grid if you'd rather have that.
+
+## Editing from the browser
+
+GitHub Pages serves files, it cannot write them, so nothing in the browser can
+save straight back to `data.json`. The page works around that with an
+export-and-commit loop:
+
+1. Open an outfit and press **Edit**. The form is generated from whatever that
+   record contains, so new attributes get inputs automatically.
+2. **Save.** The change is held in `localStorage` — it survives a refresh and
+   the gallery and search update immediately, but it only exists in that one
+   browser.
+3. A bar appears at the bottom: **Download data.json**. Replace the repo's
+   `data.json` with the downloaded file and commit it. That is what makes the
+   change real, and visible on your other devices.
+4. **Discard** drops every local edit and goes back to the published file.
+
+Inside the form: list fields are comma-separated, groups (`top`, `bottom`, …)
+get one input per attribute, and **Add** creates a new attribute as text, a
+list, or a group. Clearing a group's inputs removes those keys on save.
+
+The exported file is `JSON.stringify(…, null, 2)`, so arrays come out one entry
+per line rather than inline. It's the same data, just formatted differently
+from the hand-written original.
+
+> Editing is deliberately local-only. Writing to the repo from the page would
+> mean putting a GitHub token with write access into a public site, where any
+> visitor could read it.
+
 ## Searching
 
 Every value **and** every field name is indexed, at any nesting depth. Matching
