@@ -51,6 +51,13 @@
     <p>Every word you type must appear somewhere in the outfit. Use quotes for exact phrases, or <code>field:value</code> like <code>season:summer</code>.</p>
   </footer>
 
+  <!-- Appears only once something has been edited in this browser. -->
+  <div class="edits-bar" id="edits-bar" hidden>
+    <span class="edits-text" id="edits-text"></span>
+    <button type="button" class="btn btn-primary" id="export-btn">Download data.json</button>
+    <button type="button" class="btn btn-quiet" id="discard-btn">Discard</button>
+  </div>
+
   <!-- Lightbox -->
   <div class="lightbox" id="lightbox" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="lb-title">
     <button type="button" class="lb-close" id="lb-close" aria-label="Close preview">&times;</button>
@@ -62,8 +69,12 @@
         <img class="lb-image" id="lb-image" src="" alt="">
       </div>
       <div class="lb-details" id="lb-details">
-        <h2 class="lb-title" id="lb-title"></h2>
+        <div class="lb-head">
+          <h2 class="lb-title" id="lb-title"></h2>
+          <button type="button" class="btn btn-quiet" id="lb-edit">Edit</button>
+        </div>
         <dl class="lb-list" id="lb-list"></dl>
+        <form class="lb-form" id="lb-form" hidden></form>
       </div>
     </div>
   </div>
