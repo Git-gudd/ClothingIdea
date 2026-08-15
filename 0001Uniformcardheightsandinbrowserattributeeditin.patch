@@ -1,0 +1,865 @@
+From c203dd50e1705ce3dd9211e3711190d3010b7950 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 9 Aug 2026 15:29:09 +0000
+Subject: [PATCH] Uniform card heights and in-browser attribute editing
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Layout: replace the CSS-columns masonry with a grid where every card is
+the same height — one fixed picture box (--card-ratio) plus a fixed-height
+body. Defaults to object-fit: contain so full-body outfits aren't cropped;
+--card-fit: cover switches to a tighter, cropped grid.
+
+Editing: Pages can't write files, so the lightbox gains an Edit form that
+saves to localStorage and a bar that exports a regenerated data.json to
+commit. The form is generated from each record, so invented attributes get
+inputs automatically, and Add creates new text/list/group attributes.
+
+Also fixes two bugs found while testing:
+- the backdrop handler closed the dialog when a control re-rendered the
+  panel mid-click, since the clicked node was detached by then; it now
+  tests the backdrop element itself
+- elements with an explicit display stayed painted while [hidden], which
+  left the read-only detail list showing behind the edit form
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_018L2BZgrSpCaQ8RPdasHPtR
+---
+ README.md  |  43 +++++++
+ index.html |  13 +-
+ script.js  | 344 ++++++++++++++++++++++++++++++++++++++++++++++++++---
+ style.css  | 208 ++++++++++++++++++++++++++++----
+ 4 files changed, 569 insertions(+), 39 deletions(-)
+
+diff --git a/README.md b/README.md
+index 75c79e7..cf173b3 100644
+--- a/README.md
++++ b/README.md
+@@ -66,6 +66,49 @@ Notes on the conventions used here:
+   panel; anything else is appended in the order it appears in the JSON.
+ - Gallery cards show `season` as plain tags and `style` as blue tags.
+ 
++## Card size
++
++Every card is the same height: one fixed picture box plus a fixed-height body.
++Two knobs at the top of `style.css` control it:
++
++```css
++--card-ratio: 3 / 5;    /* shape of the picture box */
++--card-fit:   contain;  /* contain = letterbox, cover = fill and crop */
++```
++
++The photos range from 0.40 to 0.74 wide-to-tall, so no single box fits them
++all. `contain` is the default because cropping a full-body outfit tends to cut
++off the shoes or the head; the bars it leaves are near-invisible on the dark
++background. Switch to `cover` for a tighter grid if you'd rather have that.
++
++## Editing from the browser
++
++GitHub Pages serves files, it cannot write them, so nothing in the browser can
++save straight back to `data.json`. The page works around that with an
++export-and-commit loop:
++
++1. Open an outfit and press **Edit**. The form is generated from whatever that
++   record contains, so new attributes get inputs automatically.
++2. **Save.** The change is held in `localStorage` — it survives a refresh and
++   the gallery and search update immediately, but it only exists in that one
++   browser.
++3. A bar appears at the bottom: **Download data.json**. Replace the repo's
++   `data.json` with the downloaded file and commit it. That is what makes the
++   change real, and visible on your other devices.
++4. **Discard** drops every local edit and goes back to the published file.
++
++Inside the form: list fields are comma-separated, groups (`top`, `bottom`, …)
++get one input per attribute, and **Add** creates a new attribute as text, a
++list, or a group. Clearing a group's inputs removes those keys on save.
++
++The exported file is `JSON.stringify(…, null, 2)`, so arrays come out one entry
++per line rather than inline. It's the same data, just formatted differently
++from the hand-written original.
++
++> Editing is deliberately local-only. Writing to the repo from the page would
++> mean putting a GitHub token with write access into a public site, where any
++> visitor could read it.
++
+ ## Searching
+ 
+ Every value **and** every field name is indexed, at any nesting depth. Matching
+diff --git a/index.html b/index.html
+index 13dac0f..c1016d8 100644
+--- a/index.html
++++ b/index.html
+@@ -51,6 +51,13 @@
+     <p>Every word you type must appear somewhere in the outfit. Use quotes for exact phrases, or <code>field:value</code> like <code>season:summer</code>.</p>
+   </footer>
+ 
++  <!-- Appears only once something has been edited in this browser. -->
++  <div class="edits-bar" id="edits-bar" hidden>
++    <span class="edits-text" id="edits-text"></span>
++    <button type="button" class="btn btn-primary" id="export-btn">Download data.json</button>
++    <button type="button" class="btn btn-quiet" id="discard-btn">Discard</button>
++  </div>
++
+   <!-- Lightbox -->
+   <div class="lightbox" id="lightbox" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="lb-title">
+     <button type="button" class="lb-close" id="lb-close" aria-label="Close preview">&times;</button>
+@@ -62,8 +69,12 @@
+         <img class="lb-image" id="lb-image" src="" alt="">
+       </div>
+       <div class="lb-details" id="lb-details">
+-        <h2 class="lb-title" id="lb-title"></h2>
++        <div class="lb-head">
++          <h2 class="lb-title" id="lb-title"></h2>
++          <button type="button" class="btn btn-quiet" id="lb-edit">Edit</button>
++        </div>
+         <dl class="lb-list" id="lb-list"></dl>
++        <form class="lb-form" id="lb-form" hidden></form>
+       </div>
+     </div>
+   </div>
+diff --git a/script.js b/script.js
+index 376d934..58889f7 100644
+--- a/script.js
++++ b/script.js
+@@ -23,10 +23,16 @@
+     'season', 'occasion', 'style', 'keywords', 'notes'
+   ];
+ 
++  /* Edits made in the browser live here until they're exported. GitHub Pages
++     serves files, it can't write them, so "saving" means keeping the change in
++     localStorage and letting you download a fresh data.json to commit. */
++  var STORE_KEY = 'outfitLibrary.edits.v1';
++
+   var outfits = [];      // raw records, each with a private _search index
+   var visible = [];      // currently filtered records, in gallery order
+   var lightboxIndex = -1;
+   var lastFocused = null;
++  var editing = false;
+ 
+   var els = {
+     gallery: document.getElementById('gallery'),
+@@ -43,7 +49,13 @@
+     lbDetails: document.getElementById('lb-details'),
+     lbClose: document.getElementById('lb-close'),
+     lbPrev: document.getElementById('lb-prev'),
+-    lbNext: document.getElementById('lb-next')
++    lbNext: document.getElementById('lb-next'),
++    lbEdit: document.getElementById('lb-edit'),
++    lbForm: document.getElementById('lb-form'),
++    editsBar: document.getElementById('edits-bar'),
++    editsText: document.getElementById('edits-text'),
++    exportBtn: document.getElementById('export-btn'),
++    discardBtn: document.getElementById('discard-btn')
+   };
+ 
+   /* ------------------------------------------------------------------------
+@@ -343,6 +355,7 @@
+ 
+   function closeLightbox() {
+     if (els.lightbox.hidden) return;
++    if (editing) closeEditor();
+ 
+     els.lightbox.hidden = true;
+     els.lightbox.setAttribute('aria-hidden', 'true');
+@@ -357,15 +370,26 @@
+   }
+ 
+   function step(delta) {
+-    if (visible.length < 2) return;
++    if (editing || visible.length < 2) return;
+     var next = (lightboxIndex + delta + visible.length) % visible.length;
+     showAt(next);
+   }
+ 
+-  /* Keep Tab inside the dialog while it's open. */
++  /* Keep Tab inside the dialog while it's open. Queried live so the edit
++     form's inputs join the cycle while it is open. */
+   function trapFocus(event) {
+-    var focusable = [els.lbClose, els.lbPrev, els.lbNext].filter(function (el) {
+-      return !el.hidden;
++    var candidates = [els.lbClose, els.lbPrev, els.lbNext].concat(
++      Array.prototype.slice.call(
++        els.lightbox.querySelectorAll('input, select, textarea, button, [href]')
++      )
++    );
++
++    var seen = [];
++    var focusable = candidates.filter(function (el) {
++      if (!el || el.hidden || el.disabled || seen.indexOf(el) !== -1) return false;
++      if (el.closest('[hidden]')) return false;
++      seen.push(el);
++      return true;
+     });
+     if (focusable.length === 0) return;
+ 
+@@ -384,6 +408,273 @@
+     }
+   }
+ 
++  /* ------------------------------------------------------------------------
++     Editing
++
++     The form is generated from whatever the record actually contains, so a
++     field you invent in data.json gets an input automatically. Types are
++     preserved on save: arrays stay arrays, groups stay nested objects.
++     ---------------------------------------------------------------------- */
++
++  /* A copy without the internal _index, ready to serialise. */
++  function plain(outfit) {
++    var copy = {};
++    Object.keys(outfit).forEach(function (key) {
++      if (key.charAt(0) !== '_') copy[key] = outfit[key];
++    });
++    return copy;
++  }
++
++  function readStore() {
++    try {
++      return JSON.parse(localStorage.getItem(STORE_KEY)) || {};
++    } catch (error) {
++      return {};
++    }
++  }
++
++  function writeStore(store) {
++    try {
++      localStorage.setItem(STORE_KEY, JSON.stringify(store));
++      return true;
++    } catch (error) {
++      window.alert('Could not save locally: ' + error.message +
++        '\n\nDownload data.json now so the change is not lost.');
++      return false;
++    }
++  }
++
++  function refreshEditsBar() {
++    var count = Object.keys(readStore()).length;
++    els.editsBar.hidden = count === 0;
++    els.editsText.textContent = count === 1
++      ? '1 outfit edited in this browser'
++      : count + ' outfits edited in this browser';
++  }
++
++  function makeField(labelText, value, hint) {
++    var wrap = document.createElement('div');
++    wrap.className = 'field';
++
++    var id = 'f_' + Math.random().toString(36).slice(2, 9);
++
++    var label = document.createElement('label');
++    label.textContent = labelText;
++    label.htmlFor = id;
++    wrap.appendChild(label);
++
++    var multiline = String(value).length > 60;
++    var input = document.createElement(multiline ? 'textarea' : 'input');
++    if (!multiline) input.type = 'text';
++    input.id = id;
++    input.value = value;
++    wrap.appendChild(input);
++
++    if (hint) {
++      var note = document.createElement('span');
++      note.className = 'hint';
++      note.textContent = hint;
++      wrap.appendChild(note);
++    }
++
++    return { wrap: wrap, input: input };
++  }
++
++  /* Builds the form and returns a reader that turns it back into a record. */
++  function buildForm(outfit) {
++    els.lbForm.textContent = '';
++    var readers = [];
++
++    var keys = ['title'].concat(detailKeys(outfit));
++
++    keys.forEach(function (key) {
++      var value = outfit[key];
++      if (value === undefined) return;
++
++      if (Array.isArray(value)) {
++        var listField = makeField(prettyLabel(key), value.join(', '), 'Separate with commas');
++        els.lbForm.appendChild(listField.wrap);
++        readers.push(function (target) {
++          target[key] = listField.input.value
++            .split(',')
++            .map(function (part) { return part.trim(); })
++            .filter(Boolean);
++        });
++        return;
++      }
++
++      if (value && typeof value === 'object') {
++        var group = document.createElement('fieldset');
++        group.className = 'group';
++
++        var legend = document.createElement('legend');
++        legend.textContent = prettyLabel(key);
++        group.appendChild(legend);
++
++        var subReaders = [];
++        Object.keys(value).forEach(function (subKey) {
++          var subField = makeField(prettyLabel(subKey), value[subKey]);
++          group.appendChild(subField.wrap);
++          subReaders.push(function (target) {
++            var text = subField.input.value.trim();
++            if (text) target[subKey] = text;
++          });
++        });
++
++        els.lbForm.appendChild(group);
++        readers.push(function (target) {
++          var nested = {};
++          subReaders.forEach(function (read) { read(nested); });
++          if (Object.keys(nested).length) target[key] = nested;
++          else delete target[key];
++        });
++        return;
++      }
++
++      var field = makeField(prettyLabel(key), value === null ? '' : value);
++      els.lbForm.appendChild(field.wrap);
++      readers.push(function (target) { target[key] = field.input.value.trim(); });
++    });
++
++    /* Adding an attribute keeps the schema open-ended without editing code. */
++    var adder = document.createElement('div');
++    adder.className = 'add-field';
++
++    var nameInput = document.createElement('input');
++    nameInput.type = 'text';
++    nameInput.placeholder = 'New attribute, e.g. fabric';
++
++    var typeSelect = document.createElement('select');
++    [['text', 'Text'], ['list', 'List'], ['group', 'Group']].forEach(function (option) {
++      var opt = document.createElement('option');
++      opt.value = option[0];
++      opt.textContent = option[1];
++      typeSelect.appendChild(opt);
++    });
++
++    var addBtn = document.createElement('button');
++    addBtn.type = 'button';
++    addBtn.className = 'btn btn-quiet';
++    addBtn.textContent = 'Add';
++
++    addBtn.addEventListener('click', function () {
++      var name = nameInput.value.trim().replace(/\s+/g, '_').toLowerCase();
++      if (!name) return;
++      if (Object.prototype.hasOwnProperty.call(outfit, name)) {
++        window.alert('"' + name + '" already exists on this outfit.');
++        return;
++      }
++
++      var kind = typeSelect.value;
++      outfit[name] = kind === 'list' ? [] : kind === 'group' ? { type: '' } : '';
++      openEditor(outfit);   // rebuild so the new field appears
++    });
++
++    adder.appendChild(nameInput);
++    adder.appendChild(typeSelect);
++    adder.appendChild(addBtn);
++    els.lbForm.appendChild(adder);
++
++    var actions = document.createElement('div');
++    actions.className = 'form-actions';
++
++    var save = document.createElement('button');
++    save.type = 'submit';
++    save.className = 'btn btn-primary';
++    save.textContent = 'Save';
++
++    var cancel = document.createElement('button');
++    cancel.type = 'button';
++    cancel.className = 'btn btn-quiet';
++    cancel.textContent = 'Cancel';
++    cancel.addEventListener('click', closeEditor);
++
++    actions.appendChild(save);
++    actions.appendChild(cancel);
++    els.lbForm.appendChild(actions);
++
++    return function readForm() {
++      var target = plain(outfit);
++      readers.forEach(function (read) { read(target); });
++      return target;
++    };
++  }
++
++  var currentReader = null;
++
++  function openEditor(outfit) {
++    editing = true;
++    currentReader = buildForm(outfit);
++    els.lbList.hidden = true;
++    els.lbForm.hidden = false;
++    els.lbEdit.textContent = 'Editing';
++    els.lbEdit.disabled = true;
++    /* Navigating away mid-edit would silently drop what's been typed. */
++    els.lbPrev.disabled = true;
++    els.lbNext.disabled = true;
++    els.lbDetails.scrollTop = 0;
++  }
++
++  function closeEditor() {
++    editing = false;
++    currentReader = null;
++    els.lbForm.hidden = true;
++    els.lbForm.textContent = '';
++    els.lbList.hidden = false;
++    els.lbEdit.textContent = 'Edit';
++    els.lbEdit.disabled = false;
++    els.lbPrev.disabled = false;
++    els.lbNext.disabled = false;
++    if (lightboxIndex >= 0) fillDetails(visible[lightboxIndex]);
++  }
++
++  function saveEditor() {
++    if (!currentReader || lightboxIndex < 0) return;
++
++    var outfit = visible[lightboxIndex];
++    var updated = currentReader();
++
++    /* Replace the record's own keys in place so object identity — and the
++       position of the record inside `outfits` — is preserved. */
++    Object.keys(outfit).forEach(function (key) {
++      if (key.charAt(0) !== '_') delete outfit[key];
++    });
++    Object.keys(updated).forEach(function (key) { outfit[key] = updated[key]; });
++    outfit._index = buildIndex(outfit);
++
++    var store = readStore();
++    store[String(outfit.id)] = plain(outfit);
++    writeStore(store);
++    refreshEditsBar();
++
++    closeEditor();
++    applySearch();
++
++    /* The edit may have moved the outfit out of the current filter. */
++    var position = visible.indexOf(outfit);
++    if (position === -1) closeLightbox();
++    else showAt(position);
++  }
++
++  function exportData() {
++    var payload = JSON.stringify(outfits.map(plain), null, 2) + '\n';
++    var url = URL.createObjectURL(new Blob([payload], { type: 'application/json' }));
++
++    var link = document.createElement('a');
++    link.href = url;
++    link.download = 'data.json';
++    document.body.appendChild(link);
++    link.click();
++    document.body.removeChild(link);
++    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
++  }
++
++  function discardEdits() {
++    if (!window.confirm('Discard every edit made in this browser and reload the published data?')) return;
++    try { localStorage.removeItem(STORE_KEY); } catch (error) { /* nothing to do */ }
++    window.location.reload();
++  }
++
+   /* ------------------------------------------------------------------------
+      Events
+      ---------------------------------------------------------------------- */
+@@ -411,22 +702,40 @@
+   els.lbPrev.addEventListener('click', function () { step(-1); });
+   els.lbNext.addEventListener('click', function () { step(1); });
+ 
+-  /* Clicking the backdrop — anywhere outside the panel — closes. */
++  els.lbEdit.addEventListener('click', function () {
++    if (lightboxIndex >= 0) openEditor(visible[lightboxIndex]);
++  });
++
++  els.lbForm.addEventListener('submit', function (event) {
++    event.preventDefault();
++    saveEditor();
++  });
++
++  els.exportBtn.addEventListener('click', exportData);
++  els.discardBtn.addEventListener('click', discardEdits);
++
++  /* Clicking the backdrop closes. Tested against the backdrop element itself
++     rather than "outside the panel", because a control that re-renders the
++     panel detaches its own node mid-click, which would otherwise read as a
++     click outside and close the dialog. */
+   els.lightbox.addEventListener('click', function (event) {
+-    if (!els.lbPanel.contains(event.target)) closeLightbox();
++    if (event.target === els.lightbox) closeLightbox();
+   });
+ 
+   document.addEventListener('keydown', function (event) {
+     if (!els.lightbox.hidden) {
+       if (event.key === 'Escape') {
+         event.preventDefault();
+-        closeLightbox();
+-      } else if (event.key === 'ArrowLeft') {
+-        step(-1);
+-      } else if (event.key === 'ArrowRight') {
+-        step(1);
++        /* Back out of the form first, so Escape never discards a half-typed
++           edit along with the whole dialog. */
++        if (editing) closeEditor();
++        else closeLightbox();
+       } else if (event.key === 'Tab') {
+         trapFocus(event);
++      } else if (!editing && event.key === 'ArrowLeft') {
++        step(-1);
++      } else if (!editing && event.key === 'ArrowRight') {
++        step(1);
+       }
+       return;
+     }
+@@ -459,12 +768,19 @@
+     .then(function (data) {
+       if (!Array.isArray(data)) throw new Error('data.json must contain an array');
+ 
++      /* Local edits win over the published file until they're exported and
++         committed, so a change survives a refresh. */
++      var store = readStore();
++
+       outfits = data.map(function (outfit) {
+-        outfit._index = buildIndex(outfit);
+-        return outfit;
++        var saved = store[String(outfit.id)];
++        var record = saved ? saved : outfit;
++        record._index = buildIndex(record);
++        return record;
+       });
+ 
+       els.status.hidden = true;
++      refreshEditsBar();
+       applySearch();
+     })
+     .catch(function (error) {
+diff --git a/style.css b/style.css
+index 301b437..4f96507 100644
+--- a/style.css
++++ b/style.css
+@@ -17,7 +17,13 @@
+ 
+   --radius:    14px;
+   --radius-sm: 8px;
+-  --header-h:  auto;
++
++  /* Every card uses one picture box so all cards end up the same height.
++     3/5 is the median shape of the photos. `contain` letterboxes rather than
++     crops — switch --card-fit to `cover` if you'd rather fill the box and lose
++     the top and bottom of the taller shots. */
++  --card-ratio: 3 / 5;
++  --card-fit:   contain;
+ 
+   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+ }
+@@ -26,6 +32,10 @@
+ *::before,
+ *::after { box-sizing: border-box; }
+ 
++/* An explicit `display` on a rule beats the hidden attribute's UA default, so
++   several elements here would stay painted while hidden. Settle it once. */
++[hidden] { display: none !important; }
++
+ html { -webkit-text-size-adjust: 100%; }
+ 
+ body {
+@@ -172,7 +182,7 @@ body {
+ }
+ 
+ /* --------------------------------------------------------------------------
+-   Gallery (masonry via CSS columns — keeps full outfits uncropped)
++   Gallery — uniform grid, every card the same height
+    -------------------------------------------------------------------------- */
+ 
+ .main {
+@@ -182,14 +192,17 @@ body {
+ }
+ 
+ .gallery {
+-  column-count: 4;
+-  column-gap: 18px;
++  display: grid;
++  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
++  gap: 18px;
+ }
+ 
+ .card {
+-  display: block;
++  display: flex;
++  flex-direction: column;
+   width: 100%;
+-  margin: 0 0 18px;
++  height: 100%;
++  margin: 0;
+   padding: 0;
+   text-align: left;
+   font: inherit;
+@@ -199,8 +212,6 @@ body {
+   border-radius: var(--radius);
+   overflow: hidden;
+   cursor: pointer;
+-  break-inside: avoid;
+-  -webkit-column-break-inside: avoid;
+   transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+ }
+ 
+@@ -214,11 +225,16 @@ body {
+ .card-image {
+   display: block;
+   width: 100%;
+-  height: auto;
+-  background: var(--bg-elevated);
++  aspect-ratio: var(--card-ratio);
++  object-fit: var(--card-fit);
++  background: #0b0d0f;
++  flex: none;
+ }
+ 
++/* The body is a fixed height too, so cards match across rows and not just
++   within one. Overflowing tags are clipped; the lightbox has the full list. */
+ .card-body {
++  flex: 1 1 auto;
+   padding: 10px 12px 12px;
+ }
+ 
+@@ -234,6 +250,7 @@ body {
+   font-size: 0.9rem;
+   font-weight: 500;
+   line-height: 1.35;
++  min-height: calc(2 * 1.35em);
+   overflow: hidden;
+   display: -webkit-box;
+   -webkit-line-clamp: 2;
+@@ -250,8 +267,11 @@ body {
+ .tags {
+   display: flex;
+   flex-wrap: wrap;
++  align-content: flex-start;
+   gap: 6px;
+   margin-top: 9px;
++  height: 50px;          /* exactly two rows of tags */
++  overflow: hidden;
+ }
+ 
+ .tag {
+@@ -316,8 +336,6 @@ body {
+   animation: fade 0.18s ease;
+ }
+ 
+-.lightbox[hidden] { display: none; }
+-
+ @keyframes fade { from { opacity: 0; } }
+ 
+ .lb-panel {
+@@ -395,6 +413,152 @@ body {
+ 
+ .lb-row dd .muted { color: var(--text-muted); }
+ 
++/* Buttons ----------------------------------------------------------------- */
++
++.btn {
++  font: inherit;
++  font-size: 0.82rem;
++  padding: 7px 13px;
++  border-radius: 999px;
++  cursor: pointer;
++  white-space: nowrap;
++  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
++}
++
++.btn-primary {
++  color: #fff;
++  background: var(--accent);
++  border: 1px solid var(--accent);
++}
++
++.btn-primary:hover { background: #2f7bea; }
++
++.btn-quiet {
++  color: var(--text-muted);
++  background: transparent;
++  border: 1px solid var(--border);
++}
++
++.btn-quiet:hover {
++  color: var(--text);
++  border-color: var(--accent);
++}
++
++/* Edit form --------------------------------------------------------------- */
++
++.lb-head {
++  display: flex;
++  align-items: flex-start;
++  justify-content: space-between;
++  gap: 12px;
++  margin-bottom: 18px;
++  padding-right: 28px;
++}
++
++.lb-head .lb-title { margin: 0; padding-right: 0; }
++
++.lb-form {
++  display: grid;
++  gap: 14px;
++}
++
++.field { display: grid; gap: 4px; }
++
++.field > label,
++.group > legend {
++  font-size: 0.7rem;
++  font-weight: 600;
++  letter-spacing: 0.08em;
++  text-transform: uppercase;
++  color: var(--accent);
++}
++
++.field input,
++.field textarea,
++.add-field input,
++.add-field select {
++  font: inherit;
++  font-size: 0.88rem;
++  width: 100%;
++  padding: 7px 10px;
++  color: var(--text);
++  background: var(--surface);
++  border: 1px solid var(--border);
++  border-radius: var(--radius-sm);
++}
++
++.field input:focus,
++.field textarea:focus {
++  outline: none;
++  border-color: var(--accent);
++  box-shadow: 0 0 0 3px var(--accent-soft);
++}
++
++.field textarea { resize: vertical; min-height: 68px; }
++
++.field .hint {
++  font-size: 0.7rem;
++  color: var(--text-faint);
++}
++
++.group {
++  margin: 0;
++  padding: 12px;
++  border: 1px solid var(--border);
++  border-radius: var(--radius-sm);
++  display: grid;
++  gap: 9px;
++}
++
++.group .field > label {
++  color: var(--text-muted);
++  text-transform: none;
++  letter-spacing: 0;
++  font-size: 0.75rem;
++  font-weight: 500;
++}
++
++.add-field {
++  display: grid;
++  grid-template-columns: minmax(0, 1fr) auto auto;
++  gap: 8px;
++  align-items: center;
++  padding-top: 4px;
++}
++
++.form-actions {
++  position: sticky;
++  bottom: -18px;
++  display: flex;
++  gap: 8px;
++  padding: 14px 0 4px;
++  background: linear-gradient(to top, var(--bg-elevated) 70%, transparent);
++}
++
++/* Local-edits bar --------------------------------------------------------- */
++
++.edits-bar {
++  position: fixed;
++  left: 50%;
++  bottom: 20px;
++  translate: -50% 0;
++  z-index: 40;
++  display: flex;
++  align-items: center;
++  gap: 12px;
++  max-width: calc(100vw - 28px);
++  padding: 10px 12px 10px 18px;
++  background: var(--surface);
++  border: 1px solid var(--border);
++  border-radius: 999px;
++  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
++}
++
++.edits-text {
++  font-size: 0.85rem;
++  color: var(--text-muted);
++}
++
+ .lb-close,
+ .lb-nav {
+   position: fixed;
+@@ -440,8 +604,6 @@ body {
+ .lb-prev { left: 18px; }
+ .lb-next { right: 18px; }
+ 
+-.lb-nav[hidden] { display: none; }
+-
+ body.lb-open { overflow: hidden; }
+ 
+ /* --------------------------------------------------------------------------
+@@ -449,7 +611,7 @@ body.lb-open { overflow: hidden; }
+    -------------------------------------------------------------------------- */
+ 
+ @media (max-width: 1200px) {
+-  .gallery { column-count: 3; }
++  .gallery { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+ }
+ 
+ @media (max-width: 860px) {
+@@ -465,10 +627,9 @@ body.lb-open { overflow: hidden; }
+   .search-wrap { grid-area: search; }
+ 
+   .gallery {
+-    column-count: 2;
+-    column-gap: 14px;
++    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
++    gap: 14px;
+   }
+-  .card { margin-bottom: 14px; }
+ 
+   /* Stack the lightbox so the image stays large on narrow screens. */
+   .lightbox { padding: 0; }
+@@ -517,15 +678,14 @@ body.lb-open { overflow: hidden; }
+ @media (max-width: 560px) {
+   .main { padding: 18px 14px 48px; }
+   .header-inner { padding: 12px 14px; }
+-  .gallery { column-count: 2; column-gap: 10px; }
+-  .card { margin-bottom: 10px; }
++  .gallery {
++    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
++    gap: 10px;
++  }
+   .card-body { padding: 8px 9px 10px; }
+   .card-title { font-size: 0.82rem; }
+   .tag { font-size: 0.68rem; padding: 2px 7px; }
+-}
+-
+-@media (max-width: 380px) {
+-  .gallery { column-count: 1; }
++  .tags { height: 46px; }
+ }
+ 
+ @media (prefers-reduced-motion: reduce) {
+-- 
+2.43.0
+

@@ -12,9 +12,9 @@
     },
     "top": {
       "type": "Hoodie",
-      "color": "Olive",
+      "color": "Green",
       "fit": "Regular",
-      "layered": "White T-shirt underneath"
+      "layered": "White T-shirt"
     },
     "bottom": {
       "type": "Jeans",
@@ -22,14 +22,30 @@
       "fit": "Straight"
     },
     "shoes": {
-      "type": "Chelsea boots",
+      "type": "Boots",
       "color": "Black",
       "material": "Leather"
     },
-    "season": ["Fall", "Winter"],
-    "occasion": ["Casual", "Weekend"],
-    "style": ["Rugged", "Layered", "Americana"],
-    "keywords": ["layering", "three layers", "hoodie under jacket", "cozy", "cold weather"],
+    "season": [
+      "Fall",
+      "Winter"
+    ],
+    "occasion": [
+      "Casual",
+      "Weekend"
+    ],
+    "style": [
+      "Rugged",
+      "Layered",
+      "Americana"
+    ],
+    "keywords": [
+      "layering",
+      "three layers",
+      "hoodie under jacket",
+      "cozy",
+      "cold weather"
+    ],
     "notes": "Hoodie plus overshirt is an easy way to add warmth without a bulky coat."
   },
   {
@@ -57,10 +73,27 @@
       "color": "White",
       "material": "Leather"
     },
-    "season": ["Spring", "Summer"],
-    "occasion": ["Casual", "Night out", "Date"],
-    "style": ["Minimal", "Monochrome", "Relaxed"],
-    "keywords": ["black and white", "open shirt", "clean", "simple", "high contrast"],
+    "season": [
+      "Spring",
+      "Summer"
+    ],
+    "occasion": [
+      "Casual",
+      "Night out",
+      "Date"
+    ],
+    "style": [
+      "Minimal",
+      "Monochrome",
+      "Relaxed"
+    ],
+    "keywords": [
+      "black and white",
+      "open shirt",
+      "clean",
+      "simple",
+      "high contrast"
+    ],
     "notes": "White sneakers keep an all black outfit from reading too heavy."
   },
   {
@@ -88,10 +121,27 @@
       "type": "Sneakers",
       "color": "White"
     },
-    "season": ["Spring", "Summer"],
-    "occasion": ["Casual", "Coffee", "Weekend"],
-    "style": ["Minimal", "Soft", "Everyday"],
-    "keywords": ["green", "open camp shirt", "dark denim", "easy", "coffee date"],
+    "season": [
+      "Spring",
+      "Summer"
+    ],
+    "occasion": [
+      "Casual",
+      "Coffee",
+      "Weekend"
+    ],
+    "style": [
+      "Minimal",
+      "Soft",
+      "Everyday"
+    ],
+    "keywords": [
+      "green",
+      "open camp shirt",
+      "dark denim",
+      "easy",
+      "coffee date"
+    ],
     "notes": "Muted green reads softer than a bold color but still adds interest."
   },
   {
@@ -119,11 +169,30 @@
       "color": "Black",
       "accent": "Red"
     },
-    "accessories": ["Silver chain necklace", "Bracelet"],
-    "season": ["Fall", "Spring"],
-    "occasion": ["Casual", "Weekend"],
-    "style": ["Streetwear", "Cozy", "Neutral"],
-    "keywords": ["chunky knit", "beige", "sneakers", "warm neutrals", "open cardigan"],
+    "accessories": [
+      "Silver chain necklace",
+      "Bracelet"
+    ],
+    "season": [
+      "Fall",
+      "Spring"
+    ],
+    "occasion": [
+      "Casual",
+      "Weekend"
+    ],
+    "style": [
+      "Streetwear",
+      "Cozy",
+      "Neutral"
+    ],
+    "keywords": [
+      "chunky knit",
+      "beige",
+      "sneakers",
+      "warm neutrals",
+      "open cardigan"
+    ],
     "notes": "The cardigan does all the work here, so the rest stays plain."
   },
   {
@@ -148,13 +217,30 @@
     },
     "shoes": {
       "type": "Sneakers",
-      "color": "Grey",
+      "color": "White",
       "material": "Canvas"
     },
-    "season": ["Spring", "Fall"],
-    "occasion": ["Casual", "Smart casual", "Weekend"],
-    "style": ["Classic", "Americana", "Everyday"],
-    "keywords": ["chambray", "denim over tee", "khaki", "tan pants", "layer over a tee"],
+    "season": [
+      "Spring",
+      "Fall"
+    ],
+    "occasion": [
+      "Casual",
+      "Smart casual",
+      "Weekend"
+    ],
+    "style": [
+      "Classic",
+      "Americana",
+      "Everyday"
+    ],
+    "keywords": [
+      "chambray",
+      "denim over tee",
+      "khaki",
+      "tan pants",
+      "layer over a tee"
+    ],
     "notes": "Denim shirt works open as a light jacket or buttoned as a shirt."
   },
   {
@@ -182,10 +268,27 @@
       "color": "White",
       "material": "Leather"
     },
-    "season": ["Fall", "Winter"],
-    "occasion": ["Casual", "Errands", "Travel"],
-    "style": ["Athleisure", "Streetwear", "Comfort"],
-    "keywords": ["grey sweatsuit", "matching set", "loungewear", "airport", "warm"],
+    "season": [
+      "Fall",
+      "Winter"
+    ],
+    "occasion": [
+      "Casual",
+      "Errands",
+      "Travel"
+    ],
+    "style": [
+      "Athleisure",
+      "Streetwear",
+      "Comfort"
+    ],
+    "keywords": [
+      "grey sweatsuit",
+      "matching set",
+      "loungewear",
+      "airport",
+      "warm"
+    ],
     "notes": "A structured jacket over a full sweatsuit keeps it from looking like pyjamas."
   },
   {
@@ -213,11 +316,28 @@
       "color": "Black",
       "material": "Leather"
     },
-    "accessories": ["Gold chain necklace"],
-    "season": ["Spring", "Fall"],
-    "occasion": ["Casual", "Night out"],
-    "style": ["Rugged", "Relaxed", "Everyday"],
-    "keywords": ["cuffed jeans", "black and blue", "open shirt", "simple"],
+    "accessories": [
+      "Gold chain necklace"
+    ],
+    "season": [
+      "Spring",
+      "Fall"
+    ],
+    "occasion": [
+      "Casual",
+      "Night out"
+    ],
+    "style": [
+      "Rugged",
+      "Relaxed",
+      "Everyday"
+    ],
+    "keywords": [
+      "cuffed jeans",
+      "black and blue",
+      "open shirt",
+      "simple"
+    ],
     "notes": "Cuffing the hem shows the boot and stops the leg from stacking."
   },
   {
@@ -245,11 +365,30 @@
       "color": "White",
       "material": "Leather"
     },
-    "accessories": ["Black leather belt", "Gold chain necklace"],
-    "season": ["Spring", "Fall"],
-    "occasion": ["Casual", "Smart casual", "Weekend"],
-    "style": ["Minimal", "Clean", "Neutral"],
-    "keywords": ["beige jacket", "light denim", "tucked tee", "balanced"],
+    "accessories": [
+      "Black leather belt",
+      "Gold chain necklace"
+    ],
+    "season": [
+      "Spring",
+      "Fall"
+    ],
+    "occasion": [
+      "Casual",
+      "Smart casual",
+      "Weekend"
+    ],
+    "style": [
+      "Minimal",
+      "Clean",
+      "Neutral"
+    ],
+    "keywords": [
+      "beige jacket",
+      "light denim",
+      "tucked tee",
+      "balanced"
+    ],
     "notes": "Neutral outerwear over black keeps the contrast soft."
   },
   {
@@ -276,11 +415,33 @@
       "type": "Sneakers",
       "color": "Black"
     },
-    "accessories": ["Black leather belt", "Silver chain necklace", "Watch"],
-    "season": ["Spring", "Summer", "Fall"],
-    "occasion": ["Night out", "Date", "Dinner"],
-    "style": ["Monochrome", "Minimal", "Sleek"],
-    "keywords": ["all black", "black on black", "evening", "clean", "sharp"],
+    "accessories": [
+      "Black leather belt",
+      "Silver chain necklace",
+      "Watch"
+    ],
+    "season": [
+      "Spring",
+      "Summer",
+      "Fall"
+    ],
+    "occasion": [
+      "Night out",
+      "Date",
+      "Dinner"
+    ],
+    "style": [
+      "Monochrome",
+      "Minimal",
+      "Sleek"
+    ],
+    "keywords": [
+      "all black",
+      "black on black",
+      "evening",
+      "clean",
+      "sharp"
+    ],
     "notes": "Mixing textures matters when everything is one color."
   },
   {
@@ -308,11 +469,29 @@
       "color": "Grey",
       "material": "Suede"
     },
-    "accessories": ["Bracelet"],
-    "season": ["Spring", "Summer"],
-    "occasion": ["Smart casual", "Weekend", "Drinks"],
-    "style": ["Preppy", "Relaxed tailoring", "Coastal"],
-    "keywords": ["rolled hem", "no socks", "blazer with tee", "dressed down jacket"],
+    "accessories": [
+      "Bracelet"
+    ],
+    "season": [
+      "Spring",
+      "Summer"
+    ],
+    "occasion": [
+      "Smart casual",
+      "Weekend",
+      "Drinks"
+    ],
+    "style": [
+      "Preppy",
+      "Relaxed tailoring",
+      "Coastal"
+    ],
+    "keywords": [
+      "rolled hem",
+      "no socks",
+      "blazer with tee",
+      "dressed down jacket"
+    ],
     "notes": "A soft unstructured blazer over a plain tee is the easiest way to look put together."
   },
   {
@@ -334,10 +513,27 @@
       "type": "Sneakers",
       "color": "White"
     },
-    "season": ["Spring", "Summer"],
-    "occasion": ["Casual", "Errands", "Coffee"],
-    "style": ["Minimal", "Streetwear", "Everyday"],
-    "keywords": ["boxy tee", "basics", "white and blue", "simple", "clean"],
+    "season": [
+      "Spring",
+      "Summer"
+    ],
+    "occasion": [
+      "Casual",
+      "Errands",
+      "Coffee"
+    ],
+    "style": [
+      "Minimal",
+      "Streetwear",
+      "Everyday"
+    ],
+    "keywords": [
+      "boxy tee",
+      "basics",
+      "white and blue",
+      "simple",
+      "clean"
+    ],
     "notes": "Boxy tee plus relaxed jeans, the default warm weather uniform."
   },
   {
@@ -359,11 +555,31 @@
       "color": "White",
       "material": "Leather"
     },
-    "accessories": ["Silver chain necklace"],
-    "season": ["Spring", "Summer", "Fall"],
-    "occasion": ["Smart casual", "Office", "Coffee"],
-    "style": ["Minimal", "Scandinavian", "Clean"],
-    "keywords": ["grey pants", "off white", "neutral", "tidy", "understated"],
+    "accessories": [
+      "Silver chain necklace"
+    ],
+    "season": [
+      "Spring",
+      "Summer",
+      "Fall"
+    ],
+    "occasion": [
+      "Smart casual",
+      "Office",
+      "Coffee"
+    ],
+    "style": [
+      "Minimal",
+      "Scandinavian",
+      "Clean"
+    ],
+    "keywords": [
+      "grey pants",
+      "off white",
+      "neutral",
+      "tidy",
+      "understated"
+    ],
     "notes": "Swapping jeans for trousers instantly makes a plain tee look intentional."
   },
   {
@@ -387,11 +603,29 @@
       "color": "White",
       "material": "Canvas"
     },
-    "accessories": ["Watch"],
-    "season": ["Summer"],
-    "occasion": ["Casual", "Vacation", "Date"],
-    "style": ["Coastal", "Preppy", "Summer"],
-    "keywords": ["white denim", "ripped jeans", "navy and white", "holiday", "bright"],
+    "accessories": [
+      "Watch"
+    ],
+    "season": [
+      "Summer"
+    ],
+    "occasion": [
+      "Casual",
+      "Vacation",
+      "Date"
+    ],
+    "style": [
+      "Coastal",
+      "Preppy",
+      "Summer"
+    ],
+    "keywords": [
+      "white denim",
+      "ripped jeans",
+      "navy and white",
+      "holiday",
+      "bright"
+    ],
     "notes": "White jeans need a strong top color to anchor them."
   },
   {
@@ -418,11 +652,33 @@
       "color": "Black",
       "material": "Leather"
     },
-    "accessories": ["Silver buckle belt", "Silver chain necklace"],
-    "season": ["Fall", "Winter"],
-    "occasion": ["Formal", "Night out", "Event", "Dinner"],
-    "style": ["Monochrome", "Tailored", "Sleek", "Modern"],
-    "keywords": ["all black", "suit without shirt", "no tie", "wide trousers", "evening"],
+    "accessories": [
+      "Silver buckle belt",
+      "Silver chain necklace"
+    ],
+    "season": [
+      "Fall",
+      "Winter"
+    ],
+    "occasion": [
+      "Formal",
+      "Night out",
+      "Event",
+      "Dinner"
+    ],
+    "style": [
+      "Monochrome",
+      "Tailored",
+      "Sleek",
+      "Modern"
+    ],
+    "keywords": [
+      "all black",
+      "suit without shirt",
+      "no tie",
+      "wide trousers",
+      "evening"
+    ],
     "notes": "A tee under the jacket keeps a black suit from feeling like business wear."
   },
   {
@@ -451,11 +707,29 @@
       "color": "Black",
       "material": "Leather"
     },
-    "accessories": ["Black leather belt"],
-    "season": ["Spring", "Fall"],
-    "occasion": ["Casual", "Smart casual"],
-    "style": ["Rugged", "Classic", "Tonal"],
-    "keywords": ["tonal navy", "suede", "chore jacket", "light denim", "boots"],
+    "accessories": [
+      "Black leather belt"
+    ],
+    "season": [
+      "Spring",
+      "Fall"
+    ],
+    "occasion": [
+      "Casual",
+      "Smart casual"
+    ],
+    "style": [
+      "Rugged",
+      "Classic",
+      "Tonal"
+    ],
+    "keywords": [
+      "tonal navy",
+      "suede",
+      "chore jacket",
+      "light denim",
+      "boots"
+    ],
     "notes": "Matching the jacket and tee shade makes the light denim pop."
   },
   {
@@ -484,11 +758,31 @@
       "color": "Black",
       "material": "Leather"
     },
-    "accessories": ["Silver buckle belt", "Pendant necklace", "Pocket square"],
-    "season": ["Spring", "Fall"],
-    "occasion": ["Smart casual", "Dinner", "Drinks"],
-    "style": ["Relaxed tailoring", "Classic", "Pattern"],
-    "keywords": ["check blazer", "sport coat with jeans", "patterned jacket", "dressed up denim"],
+    "accessories": [
+      "Silver buckle belt",
+      "Pendant necklace",
+      "Pocket square"
+    ],
+    "season": [
+      "Spring",
+      "Fall"
+    ],
+    "occasion": [
+      "Smart casual",
+      "Dinner",
+      "Drinks"
+    ],
+    "style": [
+      "Relaxed tailoring",
+      "Classic",
+      "Pattern"
+    ],
+    "keywords": [
+      "check blazer",
+      "sport coat with jeans",
+      "patterned jacket",
+      "dressed up denim"
+    ],
     "notes": "A patterned jacket is the statement, so everything else stays plain."
   },
   {
@@ -515,11 +809,30 @@
       "color": "Brown",
       "material": "Suede"
     },
-    "accessories": ["Brown leather belt", "Gold chain necklace"],
-    "season": ["Spring", "Summer"],
-    "occasion": ["Smart casual", "Wedding guest", "Dinner"],
-    "style": ["Italian", "Warm neutrals", "Relaxed tailoring"],
-    "keywords": ["tan blazer", "off white pants", "brown and navy", "summer tailoring"],
+    "accessories": [
+      "Brown leather belt",
+      "Gold chain necklace"
+    ],
+    "season": [
+      "Spring",
+      "Summer"
+    ],
+    "occasion": [
+      "Smart casual",
+      "Wedding guest",
+      "Dinner"
+    ],
+    "style": [
+      "Italian",
+      "Warm neutrals",
+      "Relaxed tailoring"
+    ],
+    "keywords": [
+      "tan blazer",
+      "off white pants",
+      "brown and navy",
+      "summer tailoring"
+    ],
     "notes": "Camel over navy over cream, three warm tones that never fight."
   },
   {
@@ -548,10 +861,27 @@
       "type": "Boat shoes",
       "color": "White"
     },
-    "season": ["Spring", "Summer"],
-    "occasion": ["Casual", "Beach", "Weekend"],
-    "style": ["Californian", "Layered", "Relaxed"],
-    "keywords": ["beach", "plaid under denim", "cool evening", "coastal", "sweat shorts"],
+    "season": [
+      "Spring",
+      "Summer"
+    ],
+    "occasion": [
+      "Casual",
+      "Beach",
+      "Weekend"
+    ],
+    "style": [
+      "Californian",
+      "Layered",
+      "Relaxed"
+    ],
+    "keywords": [
+      "beach",
+      "plaid under denim",
+      "cool evening",
+      "coastal",
+      "sweat shorts"
+    ],
     "notes": "Layers on top with shorts below works for cool mornings by the water."
   },
   {
@@ -570,11 +900,31 @@
       "color": "Black",
       "fit": "Relaxed"
     },
-    "accessories": ["Pendant necklace", "Bracelet"],
-    "season": ["Summer"],
-    "occasion": ["Vacation", "Beach", "Dinner", "Date"],
-    "style": ["Resort", "Minimal", "Coastal"],
-    "keywords": ["linen", "holiday", "rolled sleeves", "black and white", "warm evening"],
+    "accessories": [
+      "Pendant necklace",
+      "Bracelet"
+    ],
+    "season": [
+      "Summer"
+    ],
+    "occasion": [
+      "Vacation",
+      "Beach",
+      "Dinner",
+      "Date"
+    ],
+    "style": [
+      "Resort",
+      "Minimal",
+      "Coastal"
+    ],
+    "keywords": [
+      "linen",
+      "holiday",
+      "rolled sleeves",
+      "black and white",
+      "warm evening"
+    ],
     "notes": "Open linen shirt over shorts, the easiest hot weather look."
   },
   {
@@ -598,10 +948,26 @@
       "color": "Cream",
       "material": "Leather"
     },
-    "season": ["Summer"],
-    "occasion": ["Casual", "Vacation", "Coffee"],
-    "style": ["Resort", "Minimal", "Warm neutrals"],
-    "keywords": ["knit polo", "beige and navy", "sandals", "poolside", "relaxed"],
+    "season": [
+      "Summer"
+    ],
+    "occasion": [
+      "Casual",
+      "Vacation",
+      "Coffee"
+    ],
+    "style": [
+      "Resort",
+      "Minimal",
+      "Warm neutrals"
+    ],
+    "keywords": [
+      "knit polo",
+      "beige and navy",
+      "sandals",
+      "poolside",
+      "relaxed"
+    ],
     "notes": "Knit polos dress up shorts more than a T-shirt does."
   },
   {
@@ -623,11 +989,29 @@
       "color": "Tan",
       "material": "Raffia"
     },
-    "accessories": ["Silver chain necklace"],
-    "season": ["Summer"],
-    "occasion": ["Casual", "Vacation", "Dinner"],
-    "style": ["Monochrome", "Minimal", "Resort"],
-    "keywords": ["all black", "woven shoes", "no socks", "simple", "one contrast piece"],
+    "accessories": [
+      "Silver chain necklace"
+    ],
+    "season": [
+      "Summer"
+    ],
+    "occasion": [
+      "Casual",
+      "Vacation",
+      "Dinner"
+    ],
+    "style": [
+      "Monochrome",
+      "Minimal",
+      "Resort"
+    ],
+    "keywords": [
+      "all black",
+      "woven shoes",
+      "no socks",
+      "simple",
+      "one contrast piece"
+    ],
     "notes": "All black plus one natural texture at the feet."
   },
   {
@@ -651,11 +1035,29 @@
       "color": "Black",
       "material": "Suede"
     },
-    "accessories": ["Sunglasses", "Silver chain necklace"],
-    "season": ["Summer"],
-    "occasion": ["Casual", "Vacation", "Dinner"],
-    "style": ["Minimal", "Resort", "Clean"],
-    "keywords": ["linen shorts", "black and cream", "high contrast", "hot weather"],
+    "accessories": [
+      "Sunglasses",
+      "Silver chain necklace"
+    ],
+    "season": [
+      "Summer"
+    ],
+    "occasion": [
+      "Casual",
+      "Vacation",
+      "Dinner"
+    ],
+    "style": [
+      "Minimal",
+      "Resort",
+      "Clean"
+    ],
+    "keywords": [
+      "linen shorts",
+      "black and cream",
+      "high contrast",
+      "hot weather"
+    ],
     "notes": "Drawstring linen shorts still look sharp with a hard shoe."
   },
   {
@@ -680,11 +1082,31 @@
       "color": "White",
       "detail": "Worn with white crew socks"
     },
-    "accessories": ["Gold chain necklace", "Sunglasses"],
-    "season": ["Spring", "Summer"],
-    "occasion": ["Casual", "Errands", "Weekend"],
-    "style": ["Athleisure", "Streetwear", "Comfort"],
-    "keywords": ["sweat set", "brown and grey", "white socks", "lazy day", "comfortable"],
+    "accessories": [
+      "Gold chain necklace",
+      "Sunglasses"
+    ],
+    "season": [
+      "Spring",
+      "Summer"
+    ],
+    "occasion": [
+      "Casual",
+      "Errands",
+      "Weekend"
+    ],
+    "style": [
+      "Athleisure",
+      "Streetwear",
+      "Comfort"
+    ],
+    "keywords": [
+      "sweat set",
+      "brown and grey",
+      "white socks",
+      "lazy day",
+      "comfortable"
+    ],
     "notes": "Warm brown keeps grey sweats from looking like gym kit."
   },
   {
@@ -703,11 +1125,31 @@
       "color": "White",
       "fit": "Relaxed"
     },
-    "accessories": ["Pendant necklace", "Bracelet"],
-    "season": ["Summer"],
-    "occasion": ["Vacation", "Casual", "Dinner"],
-    "style": ["Resort", "Tonal", "Minimal"],
-    "keywords": ["all cream", "tonal", "texture", "boxy", "holiday", "monochrome"],
+    "accessories": [
+      "Pendant necklace",
+      "Bracelet"
+    ],
+    "season": [
+      "Summer"
+    ],
+    "occasion": [
+      "Vacation",
+      "Casual",
+      "Dinner"
+    ],
+    "style": [
+      "Resort",
+      "Tonal",
+      "Minimal"
+    ],
+    "keywords": [
+      "all cream",
+      "tonal",
+      "texture",
+      "boxy",
+      "holiday",
+      "monochrome"
+    ],
     "notes": "Tonal cream on cream works because the two textures differ."
   },
   {
@@ -735,11 +1177,30 @@
       "color": "White",
       "material": "Leather"
     },
-    "accessories": ["Pendant necklace"],
-    "season": ["Spring", "Summer"],
-    "occasion": ["Casual", "Coffee", "Weekend"],
-    "style": ["Minimal", "Warm neutrals", "Everyday"],
-    "keywords": ["shorts with a shirt", "beige", "layered", "clean", "coffee date"],
+    "accessories": [
+      "Pendant necklace"
+    ],
+    "season": [
+      "Spring",
+      "Summer"
+    ],
+    "occasion": [
+      "Casual",
+      "Coffee",
+      "Weekend"
+    ],
+    "style": [
+      "Minimal",
+      "Warm neutrals",
+      "Everyday"
+    ],
+    "keywords": [
+      "shorts with a shirt",
+      "beige",
+      "layered",
+      "clean",
+      "coffee date"
+    ],
     "notes": "A light overshirt makes shorts look deliberate rather than thrown on."
   }
 ]
