@@ -1202,5 +1202,126 @@
       "coffee date"
     ],
     "notes": "A light overshirt makes shorts look deliberate rather than thrown on."
+  },
+  {
+    "id": 26,
+    "image": "Images/Picture27.png",
+    "title": "",
+    "outer": {
+      "type": "Shirt jacket",
+      "color": "Cream",
+      "sleeve": "Long sleeve"
+    },
+    "top": {
+      "type": "T-shirt",
+      "color": "White",
+      "fit": "Regular"
+    },
+    "bottom": {
+      "type": "Trousers",
+      "color": "Dark Brown",
+      "wash": "Dark wash",
+      "fit": "Straight"
+    },
+    "shoes": {
+      "type": "Sneakers",
+      "color": "White"
+    },
+    "season": [
+      "Fall",
+      "Winter"
+    ],
+    "occasion": [
+      "Casual",
+      "Coffee",
+      "Weekend"
+    ],
+    "style": [
+      "Minimal",
+      "Soft"
+    ],
+    "keywords": [
+      "shirt jacket",
+      "long sleeve"
+    ],
+    "notes": ""
+  },
+  {
+    "id": 27,
+    "image": "Images/Picture28.png",
+    "title": "",
+    "top": {
+      "type": "Linen shirt",
+      "color": "White",
+      "sleeve": "Long sleeve",
+      "fit": "Relaxed",
+      "detail": "Sleeves rolled, worn open"
+    },
+    "bottom": {
+      "type": "Trousers",
+      "color": "Dark Brown",
+      "wash": "Dark wash",
+      "fit": "Straight"
+    },
+    "shoes": {
+      "type": "Leather",
+      "color": "Brown"
+    },
+    "season": [
+      "Fall",
+      "Winter"
+    ],
+    "occasion": [
+      "Casual",
+      "Coffee",
+      "Weekend"
+    ],
+    "style": [
+      "Minimal",
+      "Soft"
+    ],
+    "keywords": [
+      "shirt jacket",
+      "long sleeve"
+    ],
+    "notes": ""
+  },
+  {
+    "id": 28,
+    "image": "Images/Picture29.png",
+    "title": "",
+    "top": {
+      "type": "Linen shirt",
+      "color": "White pattern",
+      "sleeve": "Long sleeve",
+      "fit": "Relaxed"
+    },
+    "bottom": {
+      "type": "Jean",
+      "color": "Black",
+      "fit": "Wide leg"
+    },
+    "shoes": {
+      "type": "Sneakers",
+      "color": "White"
+    },
+    "season": [
+      "Fall",
+      "Winter"
+    ],
+    "occasion": [
+      "Casual",
+      "Coffee",
+      "Weekend"
+    ],
+    "style": [
+      "Minimal",
+      "Soft"
+    ],
+    "keywords": [
+      "shirt jacket",
+      "long sleeve"
+    ],
+    "notes": ""
   }
 ]
